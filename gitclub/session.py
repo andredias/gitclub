@@ -21,7 +21,7 @@ async def get_session_payload(session_id: str) -> str | None:
     return await redis.get(session_id)
 
 
-async def delete_session(*args) -> None:
+async def delete_session(*args: str) -> None:
     await redis.delete(*args)
 
 
@@ -37,8 +37,8 @@ async def session_exists(session_id: str) -> bool:
 def create_csrf(session_id: str) -> str:
     """
     Based on
-    https://www.jokecamp.com/blog/examples-of-creating-base64-hashes-using-hmac-sha256-in-different-languages/#python3  # noqa: E501
-    """
+    https://www.jokecamp.com/blog/examples-of-creating-base64-hashes-using-hmac-sha256-in-different-languages/#python3
+    """  # noqa: E501
     message = bytes(session_id, 'utf-8')
     token = b64encode(hmac.new(config.SECRET_KEY, message, sha256).digest())
     return token.decode('utf-8')

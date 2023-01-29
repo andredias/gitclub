@@ -27,4 +27,10 @@ async def user_role_repository(user_id: int, repository_id: int) -> str | None:
         UserRepository.c.repository_id == repository_id,
     )
     result = await db.fetch_one(stmt)
-    return result and result['role']
+    return result['role'] if result else None
+
+
+async def user_repositories(user_id: int) -> list[Repository]:
+    stmt = UserRepository.select().where(UserRepository.c.user_id == user_id)
+    result = await db.fetch_all(stmt)
+    return [Repository(**row._mapping) for row in result]

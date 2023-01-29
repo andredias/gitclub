@@ -2,8 +2,10 @@ from pydantic import BaseModel
 
 
 class IssueInsert(BaseModel):
-    name: str
-    organization_id: int
+    title: str
+    closed: bool
+    repository_id: int
+    creator_id: int
 
 
 class IssueInfo(IssueInsert):

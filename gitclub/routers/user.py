@@ -1,55 +1,39 @@
-from asyncpg.exceptions import IntegrityConstraintViolationError
-from fastapi import APIRouter, HTTPException
-from loguru import logger
+from fastapi import APIRouter, Depends, HTTPException
 
-from ..models.user import delete, get_all, get_user, insert, update
-from ..resources import db
-from ..schemas import diff_models
-from ..schemas.user import UserInfo, UserInsert, UserPatch
+from ..authentication import authenticated_user
+from ..authorization import authorized, check_authz
+from ..models.user import get_user
+from ..models.user_repository import user_repositories
+from ..schemas.repository import RepositoryInfo
+from ..schemas.user import UserInfo
 
 router = APIRouter(prefix='/users', tags=['users'])
 
 
-@router.get('', response_model=list[UserInfo])
-async def get_all_users() -> list[UserInfo]:
-    return await get_all()
-
-
-@router.post('', status_code=201)
-@db.transaction()
-async def insert_user(info: UserInsert) -> dict:
-    id_ = await insert(info)
-    return {'id': id_}
-
-
-@router.get('/{id_}', response_model=UserInfo)
-async def get_user_info(id_: int) -> UserInfo:
+async def target_user(id_: int) -> UserInfo:
     user = await get_user(id_)
     if not user:
         raise HTTPException(404)
     return user
 
 
-@router.put('/{id_}', status_code=204)
-@db.transaction()
-async def update_user(
-    id_: int,
-    patch: UserPatch,
-) -> None:
-    user = await get_user(id_)
-    if not user:
-        raise HTTPException(404)
-    patch = UserPatch(**diff_models(user, patch))
-    try:
-        await update(id_, patch)
-    except IntegrityConstraintViolationError:
-        logger.info(f'Integrity violation in {user} vs {patch}')
-        raise HTTPException(422) from None
-    return
+@router.get('/{id_}')
+async def get_user_info(
+    user: UserInfo = Depends(target_user),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> UserInfo:
+    # authenticated_user can read any user's profile
+    await check_authz(current_user, 'read_profile', user)
+    return user
 
 
-@router.delete('/{id_}', status_code=204)
-@db.transaction()
-async def delete_user(id_: int) -> None:
-    await delete(id_)
-    return
+@router.get('/{id_}/repos')
+async def get_user_respositories(
+    user: UserInfo = Depends(target_user),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> list[RepositoryInfo]:
+    # authenticated_user can read any user's profile
+    await check_authz(current_user, 'read_profile', user)
+    repos = await user_repositories(user.id)
+    # but can only read repos that he has access to
+    return [repo for repo in repos if await authorized(current_user, 'read', repo)]

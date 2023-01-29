@@ -2,7 +2,7 @@ from loguru import logger
 from sqlalchemy import Column, Integer, String, Table
 
 from ..resources import db
-from ..schemas.organization import OrganizationInsert
+from ..schemas.organization import OrganizationInfo, OrganizationInsert
 from . import metadata, random_id
 
 Organization = Table(
@@ -22,3 +22,9 @@ async def insert(organization: OrganizationInsert) -> int:
     logger.debug(stmt)
     await db.execute(stmt)
     return id_  # noqa: RET504
+
+
+async def get_organization(id_: int) -> OrganizationInfo | None:
+    query = Organization.select(Organization.c.id == id_)
+    result = await db.fetch_one(query)
+    return OrganizationInfo(**result._mapping) if result else None

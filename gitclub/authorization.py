@@ -1,10 +1,13 @@
 from typing import Type
 
+from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy import Table
 
-from .models.organization import Organization, user_role_organization
-from .models.repository import Repository, user_role_repository
+from .models.organization import Organization
+from .models.user_organization import user_role_organization
+from .models.repository import Repository
+from .models.user_repository import user_role_repository
 
 from .schemas.user import UserInfo
 from .schemas.repository import RepositoryInfo
@@ -69,28 +72,28 @@ ResourceType = BaseModel | Type[BaseModel | Table]
 
 
 async def authorized(actor: BaseModel, action: str, resource: ResourceType) -> bool:
-    match actor, resource:
+    match resource, action:  # noqa: E999
 
-        case UserInfo(id=actor_id), UserInfo(id=resource_id):
+        case UserInfo(id=resource_id), UserInfo(id=actor_id):
             role = actor_id == resource_id and 'owner' or 'reader'
             return action in user_actions[role]
 
-        case UserInfo(id=user_id), Organization:
+        case Organization, UserInfo(id=user_id):
             return action == 'create'
 
-        case UserInfo(id=user_id), OrganizationInfo(id=organization_id):
+        case OrganizationInfo(id=organization_id), UserInfo(id=user_id):
             role = await user_role_organization(user_id, organization_id)
             return bool(role) and action in org_actions[role]
 
-        case UserInfo(id=user_id), RepositoryInfo(
-            id=repository_id, organization_id=organization_id
+        case RepositoryInfo(id=repository_id, organization_id=organization_id), UserInfo(
+            id=user_id
         ):
             role = await user_role_repository(
                 user_id, repository_id
             ) or await user_role_organization(user_id, organization_id)
             return bool(role) and action in repo_actions[role]
 
-        case UserInfo(id=user_id), IssueInfo(repository_id=repository_id, creator_id=creator_id):
+        case IssueInfo(repository_id=repository_id, creator_id=creator_id), UserInfo(id=user_id):
             role = (
                 user_id == creator_id
                 and 'creator'
@@ -99,3 +102,9 @@ async def authorized(actor: BaseModel, action: str, resource: ResourceType) -> b
             return bool(role) and action in issue_actions[role]
 
     raise NotImplementedError(f'authorization not implemented for {actor} {action} {resource}')
+
+
+async def check_authz(actor: BaseModel, action: str, resource: ResourceType) -> bool:
+    if not await authorized(actor, action, resource):
+        raise HTTPException(403)
+    return True
