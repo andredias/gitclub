@@ -1,9 +1,5 @@
-from sqlalchemy import create_engine
-
-from . import config
 from .models import (
     issue,
-    metadata,
     organization,
     repository,
     user,
@@ -120,8 +116,3 @@ async def load_fixture_data() -> None:
     await user_organization.insert(
         UserOrganizationInfo(name=randall, organization_id=monsters, role='member')
     )
-
-
-def create_db():
-    engine = create_engine(config.DATABASE_URL, echo=config.TESTING)
-    metadata.create_all(engine, checkfirst=True)
