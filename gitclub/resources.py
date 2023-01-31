@@ -61,4 +61,5 @@ async def connect_redis() -> None:
 async def disconnect_redis() -> None:
     if config.TESTING:
         await redis.flushdb()
+    await redis.close()
     return
