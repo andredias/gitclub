@@ -4,8 +4,7 @@ SHELL := /bin/bash -O globstar
 run_dev: check_env
 	@ docker-compose up -d; \
 	trap 'docker-compose down' INT; \
-	ENV=development \
-	   hypercorn --reload --config=hypercorn.toml 'gitclub.main:app'
+	ENV=development ./entrypoint.sh
 
 
 test: check_env
