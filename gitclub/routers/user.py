@@ -10,14 +10,14 @@ from ..schemas.user import UserInfo
 router = APIRouter(prefix='/users', tags=['users'])
 
 
-async def target_user(id_: int) -> UserInfo:
-    user = await get_user(id_)
+async def target_user(id: int) -> UserInfo:
+    user = await get_user(id)
     if not user:
         raise HTTPException(404)
     return user
 
 
-@router.get('/{id_}')
+@router.get('/{id}')
 async def get_user_info(
     user: UserInfo = Depends(target_user),
     current_user: UserInfo = Depends(authenticated_user),
@@ -27,7 +27,7 @@ async def get_user_info(
     return user
 
 
-@router.get('/{id_}/repos')
+@router.get('/{id}/repos')
 async def get_user_respositories(
     user: UserInfo = Depends(target_user),
     current_user: UserInfo = Depends(authenticated_user),

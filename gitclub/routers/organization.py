@@ -33,9 +33,9 @@ async def create(
     return
 
 
-@router.get('/{id_}')
-async def show(id_: int, current_user: UserInfo = Depends(authenticated_user)) -> OrganizationInfo:
-    org = await get_organization(id_)
+@router.get('/{id}')
+async def show(id: int, current_user: UserInfo = Depends(authenticated_user)) -> OrganizationInfo:
+    org = await get_organization(id)
     if not org:
         raise HTTPException(status_code=404, detail='Organization not found')
     await check_authz(current_user, 'read', org)
