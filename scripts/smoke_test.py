@@ -2,25 +2,26 @@
 
 from subprocess import check_call
 
+from fastapi import status
 from httpx import get
 from loguru import logger
 from tenacity import RetryError, retry, stop_after_delay, wait_exponential
 
 
 def init_containers() -> None:
-    command = 'docker-compose -f docker-compose.yml -f docker-compose.smoke_test.yml up -d'
+    command = 'docker-compose up -d'
     check_call(command.split())
 
 
 def stop_containers() -> None:
-    command = 'docker-compose -f docker-compose.yml -f docker-compose.smoke_test.yml down'
+    command = 'docker-compose down'
     check_call(command.split())
 
 
-@retry(stop=stop_after_delay(3), wait=wait_exponential(multiplier=0.2))
+@retry(stop=stop_after_delay(6), wait=wait_exponential(multiplier=1))
 def health_check() -> None:
     result = get('http://localhost:5000/hello')
-    assert result.status_code == 200
+    assert result.status_code == status.HTTP_200_OK
     assert result.json() == {'message': 'Hello World'}
     logger.info('Smoke test passed!')
     return
