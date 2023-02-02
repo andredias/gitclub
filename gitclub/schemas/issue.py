@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class IssueInsert(BaseModel):
     title: str
-    closed: bool
+    closed: bool = False
     repository_id: int
     creator_id: int
 

@@ -34,85 +34,125 @@ async def insert(name: str) -> int:
     )
 
 
-async def load_fixture_data() -> None:
+async def load_test_dataset() -> None:
 
     # Users #
 
-    john = await insert('john')
-    paul = await insert('paul')
-    mike = await insert('mike')
-    sully = await insert('sully')
-    ringo = await insert('ringo')
-    randall = await insert('randall')
-    await insert('admin')
+    users = {
+        'john': await insert('john'),
+        'paul': await insert('paul'),
+        'mike': await insert('mike'),
+        'sully': await insert('sully'),
+        'ringo': await insert('ringo'),
+        'randall': await insert('randall'),
+        'admin': await insert('admin'),
+    }
 
     # Orgs #
 
-    beatles = await organization.insert(
-        OrganizationInsert(
-            name='The Beatles',
-            billing_address='64 Penny Ln Liverpool, UK',
-            base_repo_role='reader',
-        )
-    )
-    monsters = await organization.insert(
-        OrganizationInsert(
-            name='Monsters Inc.',
-            billing_address='123 Scarers Rd Monstropolis, USA',
-            base_repo_role='reader',
-        )
-    )
+    organizations = {
+        'beatles': await organization.insert(
+            OrganizationInsert(
+                name='The Beatles',
+                billing_address='64 Penny Ln Liverpool, UK',
+                base_repo_role='reader',
+            )
+        ),
+        'monsters': await organization.insert(
+            OrganizationInsert(
+                name='Monsters Inc.',
+                billing_address='123 Scarers Rd Monstropolis, USA',
+                base_repo_role='reader',
+            )
+        ),
+    }
 
     # Repos #
 
-    abby_road = await repository.insert(
-        RepositoryInsert(name='Abbey Road', organization_id=beatles)
-    )
-    paperwork = await repository.insert(
-        RepositoryInsert(name='Paperwork', organization_id=monsters)
-    )
+    repositories = {
+        'abby_road': await repository.insert(
+            RepositoryInsert(name='Abbey Road', organization_id=organizations['beatles'])
+        ),
+        'paperwork': await repository.insert(
+            RepositoryInsert(name='Paperwork', organization_id=organizations['monsters'])
+        ),
+    }
 
     # Issues #
 
-    await issue.insert(IssueInsert(title='Too much critical acclaim', repo=abby_road))
+    await issue.insert(
+        IssueInsert(
+            title='Too much critical acclaim',
+            repository_id=repositories['abby_road'],
+            creator_id=users['john'],
+        )
+    )
 
     # https://github.com/osohq/oso/blob/70965f2277d7167c38d3641140e6e97dec78e3bf/languages/python/sqlalchemy-oso/tests/test_roles.py#L132-L133
 
     # Repo roles #
 
     await user_repository.insert(
-        UserRepositoryInfo(user_id=john, repository_id=abby_road, role='reader')
+        UserRepositoryInfo(
+            user_id=users['john'], repository_id=repositories['abby_road'], role='reader'
+        )
     )
     await user_repository.insert(
-        UserRepositoryInfo(user_id=paul, repository_id=abby_road, role='reader')
+        UserRepositoryInfo(
+            user_id=users['paul'], repository_id=repositories['abby_road'], role='reader'
+        )
     )
     await user_repository.insert(
-        UserRepositoryInfo(name=ringo, repository_id=abby_road, role='maintainer')
+        UserRepositoryInfo(
+            user_id=users['ringo'], repository_id=repositories['abby_road'], role='maintainer'
+        )
     )
     await user_repository.insert(
-        UserRepositoryInfo(name=mike, repository_id=paperwork, role='reader')
+        UserRepositoryInfo(
+            user_id=users['mike'], repository_id=repositories['paperwork'], role='reader'
+        )
     )
     await user_repository.insert(
-        UserRepositoryInfo(name=sully, repository_id=paperwork, role='reader')
+        UserRepositoryInfo(
+            user_id=users['sully'], repository_id=repositories['paperwork'], role='reader'
+        )
     )
 
     # Org roles #
 
     await user_organization.insert(
-        UserOrganizationInfo(user_id=john, organization_id=beatles, role='owner')
+        UserOrganizationInfo(
+            user_id=users['john'], organization_id=organizations['beatles'], role='owner'
+        )
     )
     await user_organization.insert(
-        UserOrganizationInfo(name=paul, organization_id=beatles, role='member')
+        UserOrganizationInfo(
+            user_id=users['paul'], organization_id=organizations['beatles'], role='member'
+        )
     )
     await user_organization.insert(
-        UserOrganizationInfo(name=ringo, organization_id=beatles, role='member')
+        UserOrganizationInfo(
+            user_id=users['ringo'], organization_id=organizations['beatles'], role='member'
+        )
     )
     await user_organization.insert(
-        UserOrganizationInfo(name=mike, organization_id=monsters, role='owner')
+        UserOrganizationInfo(
+            user_id=users['mike'], organization_id=organizations['monsters'], role='owner'
+        )
     )
     await user_organization.insert(
-        UserOrganizationInfo(name=sully, organization_id=monsters, role='member')
+        UserOrganizationInfo(
+            user_id=users['sully'], organization_id=organizations['monsters'], role='member'
+        )
     )
     await user_organization.insert(
-        UserOrganizationInfo(name=randall, organization_id=monsters, role='member')
+        UserOrganizationInfo(
+            user_id=users['randall'], organization_id=organizations['monsters'], role='member'
+        )
     )
+
+    return {
+        'users': users,
+        'organizations': organizations,
+        'repositories': repositories,
+    }
