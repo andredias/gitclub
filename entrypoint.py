@@ -4,7 +4,7 @@ from pathlib import Path
 from subprocess import run
 
 from gitclub import config
-from gitclub.resources import connect_database, Database
+from gitclub.resources import Database, connect_database
 
 parent_path = Path(__file__).parent
 
