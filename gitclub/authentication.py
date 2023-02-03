@@ -2,7 +2,7 @@ import re
 
 from fastapi import Cookie, Header, HTTPException
 
-from .models.user import get_user
+from .models.user import get
 from .schemas.user import UserInfo
 from .sessions import is_valid_csrf, session_exists
 
@@ -26,7 +26,7 @@ async def authenticated_user(
     ):
         raise HTTPException(status_code=401)
     user_id = int(match.group(1))
-    user = await get_user(user_id)
+    user = await get(user_id)
     if not user:
         raise HTTPException(status_code=401)
     return user

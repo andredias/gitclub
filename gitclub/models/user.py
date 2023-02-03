@@ -42,7 +42,7 @@ async def get_user_by_login(email: str, password: str) -> UserInfo | None:
     return None
 
 
-async def get_user(id_: int) -> UserInfo | None:
+async def get(id_: int) -> UserInfo | None:
     query = User.select(User.c.id == id_)
     logger.debug(query)
     result = await db.fetch_one(query)

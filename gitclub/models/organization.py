@@ -24,7 +24,7 @@ async def insert(organization: OrganizationInsert) -> int:
     return id_  # noqa: RET504
 
 
-async def get_organization(id_: int) -> OrganizationInfo | None:
+async def get(id_: int) -> OrganizationInfo | None:
     query = Organization.select(Organization.c.id == id_)
     result = await db.fetch_one(query)
     return OrganizationInfo(**result._mapping) if result else None

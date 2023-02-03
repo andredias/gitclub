@@ -21,7 +21,7 @@ async def insert(user_repository: UserRepositoryInfo) -> None:
     return
 
 
-async def user_role_repository(user_id: int, repository_id: int) -> str | None:
+async def user_role_in_repository(user_id: int, repository_id: int) -> str | None:
     stmt = UserRepository.select().where(
         UserRepository.c.user_id == user_id,
         UserRepository.c.repository_id == repository_id,
