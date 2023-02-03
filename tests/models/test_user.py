@@ -10,11 +10,11 @@ async def test_get_user(users: Users) -> None:
 
 async def test_get_user_by_id(users: Users) -> None:
     # ok
-    user_info = await user.get_user(users[0].id)
+    user_info = await user.get(users[0].id)
     assert user_info == users[0]
 
     # inexistent user
-    user_info = await user.get_user(-1)
+    user_info = await user.get(-1)
     assert user_info is None
 
 

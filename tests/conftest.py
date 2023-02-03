@@ -91,3 +91,13 @@ async def users(session_app: FastAPI) -> list[UserInfo]:
         await insert(user)
 
     return await get_all()
+
+
+@fixture
+async def test_dataset(app: FastAPI) -> dict[str, dict[str, int]]:
+    """
+    Populate the database with users, organizations, repositories and relationships.
+    """
+    from gitclub.initial_data import load_test_dataset
+
+    return await load_test_dataset()

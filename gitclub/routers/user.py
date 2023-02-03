@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ..authentication import authenticated_user
 from ..authorization import authorized, check_authz
-from ..models.user import get_user
+from ..models.user import get
 from ..models.user_repository import user_repositories
 from ..schemas.repository import RepositoryInfo
 from ..schemas.user import UserInfo
@@ -11,7 +11,7 @@ router = APIRouter(prefix='/users', tags=['users'])
 
 
 async def target_user(id: int) -> UserInfo:
-    user = await get_user(id)
+    user = await get(id)
     if not user:
         raise HTTPException(404)
     return user

@@ -34,7 +34,7 @@ async def insert(name: str) -> int:
     )
 
 
-async def load_test_dataset() -> None:
+async def load_test_dataset() -> dict[str, dict[str, int]]:
 
     # Users #
 
@@ -80,13 +80,15 @@ async def load_test_dataset() -> None:
 
     # Issues #
 
-    await issue.insert(
-        IssueInsert(
-            title='Too much critical acclaim',
-            repository_id=repositories['abby_road'],
-            creator_id=users['john'],
+    issues = {
+        'acclaim': await issue.insert(
+            IssueInsert(
+                title='Too much critical acclaim',
+                repository_id=repositories['abby_road'],
+                creator_id=users['ringo'],  # differs from the original gitclub example
+            )
         )
-    )
+    }
 
     # https://github.com/osohq/oso/blob/70965f2277d7167c38d3641140e6e97dec78e3bf/languages/python/sqlalchemy-oso/tests/test_roles.py#L132-L133
 
@@ -99,13 +101,16 @@ async def load_test_dataset() -> None:
     )
     await user_repository.insert(
         UserRepositoryInfo(
-            user_id=users['paul'], repository_id=repositories['abby_road'], role='reader'
-        )
+            user_id=users['paul'], repository_id=repositories['abby_road'], role='admin'
+        )  # different from the original gitclub example
     )
+    # ringo doesn't have a direct relationship with abby_road anymore
+    # it is also different from the original gitclub example
+
     await user_repository.insert(
         UserRepositoryInfo(
-            user_id=users['ringo'], repository_id=repositories['abby_road'], role='maintainer'
-        )
+            user_id=users['mike'], repository_id=repositories['abby_road'], role='maintainer'
+        )  # also different from the original gitclub example
     )
     await user_repository.insert(
         UserRepositoryInfo(
@@ -155,4 +160,5 @@ async def load_test_dataset() -> None:
         'users': users,
         'organizations': organizations,
         'repositories': repositories,
+        'issues': issues,
     }

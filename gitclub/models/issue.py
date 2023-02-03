@@ -1,8 +1,7 @@
-from loguru import logger
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 
 from ..resources import db
-from ..schemas.issue import IssueInsert
+from ..schemas.issue import IssueInfo, IssueInsert
 from . import metadata, random_id
 from .repository import Repository
 from .user import User
@@ -22,6 +21,11 @@ async def insert(issue: IssueInsert) -> int:
     fields = issue.dict()
     id_ = fields['id'] = random_id()
     stmt = Issue.insert().values(fields)
-    logger.debug(stmt)
     await db.execute(stmt)
     return id_  # noqa: RET504
+
+
+async def get(id: int) -> IssueInfo | None:
+    query = Issue.select(Issue.c.id == id)
+    result = await db.fetch_one(query)
+    return IssueInfo(**result._mapping) if result else None

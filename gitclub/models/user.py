@@ -35,7 +35,6 @@ async def get_user_by_email(email: str) -> UserInfo | None:
 
 async def get_user_by_login(email: str, password: str) -> UserInfo | None:
     query = User.select(User.c.email == email)
-    logger.debug(query)
     result = await db.fetch_one(query)
     if result and crypt_ctx.verify(password, result['password_hash']):
         return UserInfo(**result._mapping)
@@ -44,7 +43,6 @@ async def get_user_by_login(email: str, password: str) -> UserInfo | None:
 
 async def get(id_: int) -> UserInfo | None:
     query = User.select(User.c.id == id_)
-    logger.debug(query)
     result = await db.fetch_one(query)
     return UserInfo(**result._mapping) if result else None
 
@@ -55,7 +53,6 @@ async def insert(user: UserInsert) -> int:
     password = fields.pop('password')
     fields['password_hash'] = crypt_ctx.hash(password)
     stmt = User.insert().values(fields)
-    logger.debug(stmt)
     await db.execute(stmt)
     return id_  # noqa: RET504
 
@@ -66,13 +63,11 @@ async def update(id_: int, patch: UserPatch) -> None:
         password = fields.pop('password')
         fields['password_hash'] = crypt_ctx.hash(password)
     stmt = User.update().where(User.c.id == id_).values(**fields)
-    logger.debug(stmt)
     await db.execute(stmt)
     return
 
 
 async def delete(id_: int) -> None:
     stmt = User.delete().where(User.c.id == id_)
-    logger.debug(stmt)
     await db.execute(stmt)
     return

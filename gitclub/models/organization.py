@@ -1,4 +1,3 @@
-from loguru import logger
 from sqlalchemy import Column, Integer, String, Table
 
 from ..resources import db
@@ -19,7 +18,6 @@ async def insert(organization: OrganizationInsert) -> int:
     fields = organization.dict()
     id_ = fields['id'] = random_id()
     stmt = Organization.insert().values(fields)
-    logger.debug(stmt)
     await db.execute(stmt)
     return id_  # noqa: RET504
 
