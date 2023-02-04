@@ -13,23 +13,14 @@ from .schemas.user import UserInsert
 from .schemas.user_organization import UserOrganizationInfo
 from .schemas.user_repository import UserRepositoryInfo
 
-emails = {
-    'john': 'john@beatles.com',
-    'paul': 'paul@beatles.com',
-    'mike': 'mike@monsters.com',
-    'ringo': 'ringo@beatles.com',
-    'admin': 'admin@admin.com',
-    'sully': 'sully@monsters.com',
-    'randall': 'randall@monsters.com',
-}
-
 
 async def insert(name: str) -> int:
+    email = '{}+test@email.com'
     return await user.insert(
         UserInsert(
             name=name,
-            email=emails[name],
-            password=emails[name],
+            email=email.format(name),
+            password=email.format(name),
         )
     )
 
@@ -46,6 +37,7 @@ async def load_test_dataset() -> dict[str, dict[str, int]]:
         'ringo': await insert('ringo'),
         'randall': await insert('randall'),
         'admin': await insert('admin'),
+        'fulano': await insert('fulano'),
     }
 
     # Orgs #
