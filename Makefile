@@ -2,13 +2,12 @@ SHELL := /bin/bash -O globstar
 
 
 run_dev: check_env
-	@ docker-compose up -d; \
-	trap 'docker-compose down' INT; \
+	@ docker-compose up -d redis db; \
 	ENV=development python entrypoint.py
 
 
 test: check_env
-	@ docker-compose up -d;
+	@ docker-compose up -d redis db;
 	pytest -x --cov-report=term-missing --cov-report=html --cov-branch --cov=gitclub
 
 
