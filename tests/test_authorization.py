@@ -42,39 +42,39 @@ async def test_authorization(test_dataset: TestData) -> None:
 
     # repository
 
-    # john is a reader of abby_road
-    # paul is an admin of abby_road
-    # ringo is an indirect reader of abby_road
-    # mike is a maintainer of abby_road
-    # sully is not related to abby_road
+    # john is a reader of abbey_road
+    # paul is an admin of abbey_road
+    # ringo is an indirect reader of abbey_road
+    # mike is a maintainer of abbey_road
+    # sully is not related to abbey_road
 
-    abby_road = await repository.get(test_dataset['repositories']['abby_road'])
+    abbey_road = await repository.get(test_dataset['repositories']['abbey_road'])
 
     ringo = await user.get(test_dataset['users']['ringo'])
     mike = await user.get(test_dataset['users']['mike'])
 
-    assert abby_road and ringo and mike
+    assert abbey_road and ringo and mike
 
     for action in repo_actions['reader']:
-        assert await authorized(john, action, abby_road)
-        assert await authorized(paul, action, abby_road)
-        assert await authorized(ringo, action, abby_road)
-        assert await authorized(mike, action, abby_road)
-        assert not await authorized(sully, action, abby_road)
+        assert await authorized(john, action, abbey_road)
+        assert await authorized(paul, action, abbey_road)
+        assert await authorized(ringo, action, abbey_road)
+        assert await authorized(mike, action, abbey_road)
+        assert not await authorized(sully, action, abbey_road)
 
     for action in repo_actions['maintainer'] - repo_actions['reader']:
-        assert not await authorized(john, action, abby_road)
-        assert await authorized(paul, action, abby_road)
-        assert not await authorized(ringo, action, abby_road)
-        assert await authorized(mike, action, abby_road)
-        assert not await authorized(sully, action, abby_road)
+        assert not await authorized(john, action, abbey_road)
+        assert await authorized(paul, action, abbey_road)
+        assert not await authorized(ringo, action, abbey_road)
+        assert await authorized(mike, action, abbey_road)
+        assert not await authorized(sully, action, abbey_road)
 
     for action in repo_actions['admin'] - repo_actions['maintainer']:
-        assert not await authorized(john, action, abby_road)
-        assert await authorized(paul, action, abby_road)
-        assert not await authorized(ringo, action, abby_road)
-        assert not await authorized(mike, action, abby_road)
-        assert not await authorized(sully, action, abby_road)
+        assert not await authorized(john, action, abbey_road)
+        assert await authorized(paul, action, abbey_road)
+        assert not await authorized(ringo, action, abbey_road)
+        assert not await authorized(mike, action, abbey_road)
+        assert not await authorized(sully, action, abbey_road)
 
     # Issue
 

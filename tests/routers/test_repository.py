@@ -10,7 +10,7 @@ TestData = dict[str, dict[str, int]]
 async def test_list_repositories(test_dataset: TestData, client: AsyncClient) -> None:
     john = test_dataset['users']['john']
     fulano = test_dataset['users']['fulano']
-    abby_road = test_dataset['repositories']['abby_road']
+    abbey_road = test_dataset['repositories']['abbey_road']
     the_white_album = test_dataset['repositories']['the_white_album']
     beatles = test_dataset['organizations']['beatles']
     url = f'/organizations/{beatles}/repositories'
@@ -25,7 +25,7 @@ async def test_list_repositories(test_dataset: TestData, client: AsyncClient) ->
     assert resp.status_code == 200
     repositories = resp.json()
     assert len(repositories) == 2
-    assert {abby_road, the_white_album} == {r['id'] for r in repositories}
+    assert {abbey_road, the_white_album} == {r['id'] for r in repositories}
 
     # fulano is not a member of beatles and cannot list repositories
     await logged_session(client, fulano)
@@ -61,20 +61,20 @@ async def test_create_repository(test_dataset: TestData, client: AsyncClient) ->
 async def test_show_repository(test_dataset: TestData, client: AsyncClient) -> None:
     john = test_dataset['users']['john']
     fulano = test_dataset['users']['fulano']
-    abby_road = test_dataset['repositories']['abby_road']
+    abbey_road = test_dataset['repositories']['abbey_road']
     paperwork = test_dataset['repositories']['paperwork']
     beatles = test_dataset['organizations']['beatles']
     url = '/organizations/{}/repositories/{}'
 
     # unauthenticated user access
-    resp = await client.get(url.format(beatles, abby_road))
+    resp = await client.get(url.format(beatles, abbey_road))
     assert resp.status_code == 401
 
     # ok
     await logged_session(client, john)
-    resp = await client.get(url.format(beatles, abby_road))
+    resp = await client.get(url.format(beatles, abbey_road))
     assert resp.status_code == 200
-    assert RepositoryInfo(**resp.json()).id == abby_road
+    assert RepositoryInfo(**resp.json()).id == abbey_road
 
     # john cannot access a repository that does not belong to beatles
     await logged_session(client, john)
@@ -82,14 +82,14 @@ async def test_show_repository(test_dataset: TestData, client: AsyncClient) -> N
     assert resp.status_code == 404
 
     # inexistent organization
-    resp = await client.get(url.format(0, abby_road))
+    resp = await client.get(url.format(0, abbey_road))
     assert resp.status_code == 404
 
     # inexistent repository
     resp = await client.get(url.format(beatles, 0))
     assert resp.status_code == 404
 
-    # fulano is not a member of beatles and cannot access abby_road
+    # fulano is not a member of beatles and cannot access abbey_road
     await logged_session(client, fulano)
-    resp = await client.get(url.format(beatles, abby_road))
+    resp = await client.get(url.format(beatles, abbey_road))
     assert resp.status_code == 403

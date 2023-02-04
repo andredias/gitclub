@@ -62,7 +62,7 @@ async def load_test_dataset() -> dict[str, dict[str, int]]:
     # Repos #
 
     repositories = {
-        'abby_road': await repository.insert(
+        'abbey_road': await repository.insert(
             RepositoryInsert2(name='Abbey Road', organization_id=organizations['beatles'])
         ),
         'the_white_album': await repository.insert(
@@ -79,7 +79,7 @@ async def load_test_dataset() -> dict[str, dict[str, int]]:
         'acclaim': await issue.insert(
             IssueInsert(
                 title='Too much critical acclaim',
-                repository_id=repositories['abby_road'],
+                repository_id=repositories['abbey_road'],
                 creator_id=users['ringo'],  # differs from the original gitclub example
             )
         )
@@ -91,20 +91,20 @@ async def load_test_dataset() -> dict[str, dict[str, int]]:
 
     await user_repository.insert(
         UserRepositoryInfo(
-            user_id=users['john'], repository_id=repositories['abby_road'], role='reader'
+            user_id=users['john'], repository_id=repositories['abbey_road'], role='reader'
         )
     )
     await user_repository.insert(
         UserRepositoryInfo(
-            user_id=users['paul'], repository_id=repositories['abby_road'], role='admin'
+            user_id=users['paul'], repository_id=repositories['abbey_road'], role='admin'
         )  # different from the original gitclub example
     )
-    # ringo doesn't have a direct relationship with abby_road anymore
+    # ringo doesn't have a direct relationship with abbey_road anymore
     # it is also different from the original gitclub example
 
     await user_repository.insert(
         UserRepositoryInfo(
-            user_id=users['mike'], repository_id=repositories['abby_road'], role='maintainer'
+            user_id=users['mike'], repository_id=repositories['abbey_road'], role='maintainer'
         )  # also different from the original gitclub example
     )
     await user_repository.insert(
