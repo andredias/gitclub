@@ -3,7 +3,7 @@ from fastapi.responses import ORJSONResponse
 
 from . import config
 from .resources import shutdown, startup
-from .routers import hello, user, organization
+from .routers import hello, organization, user
 
 routers = [
     hello.router,

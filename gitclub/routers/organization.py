@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ..authentication import authenticated_user
 from ..authorization import check_authz
-from ..models.organization import Organization, get
 from ..models import organization
+from ..models.organization import Organization, get
 from ..models.user_organization import insert as insert_user_organization
 from ..models.user_organization import user_organizations
 from ..schemas.organization import OrganizationInfo, OrganizationInsert
