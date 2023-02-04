@@ -67,3 +67,7 @@ async def test_show_organization(test_dataset: TestData, client: AsyncClient) ->
     # john is not a member of monsters
     resp = await client.get(f'/organizations/{monsters}')
     assert resp.status_code == 403
+
+    # inexistent organization
+    resp = await client.get('/organizations/0')
+    assert resp.status_code == 404
