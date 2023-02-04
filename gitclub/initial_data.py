@@ -8,7 +8,7 @@ from .models import (
 )
 from .schemas.issue import IssueInsert
 from .schemas.organization import OrganizationInsert
-from .schemas.repository import RepositoryInsert
+from .schemas.repository import RepositoryInsert2
 from .schemas.user import UserInsert
 from .schemas.user_organization import UserOrganizationInfo
 from .schemas.user_repository import UserRepositoryInfo
@@ -63,10 +63,13 @@ async def load_test_dataset() -> dict[str, dict[str, int]]:
 
     repositories = {
         'abby_road': await repository.insert(
-            RepositoryInsert(name='Abbey Road', organization_id=organizations['beatles'])
+            RepositoryInsert2(name='Abbey Road', organization_id=organizations['beatles'])
         ),
+        'the_white_album': await repository.insert(
+            RepositoryInsert2(name='The White Album', organization_id=organizations['beatles'])
+        ),  # not present in the original gitclub example
         'paperwork': await repository.insert(
-            RepositoryInsert(name='Paperwork', organization_id=organizations['monsters'])
+            RepositoryInsert2(name='Paperwork', organization_id=organizations['monsters'])
         ),
     }
 

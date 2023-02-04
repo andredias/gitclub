@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from ..authentication import authenticated_user
 from ..authorization import check_authz
 from ..models import organization
-from ..models.organization import Organization, get
+from ..models.organization import Organization
 from ..models.user_organization import insert as insert_user_organization
 from ..models.user_organization import user_organizations
 from ..schemas.organization import OrganizationInfo, OrganizationInsert
@@ -11,6 +11,13 @@ from ..schemas.user import UserInfo
 from ..schemas.user_organization import UserOrganizationInfo
 
 router = APIRouter(prefix='/organizations', tags=['organizations'])
+
+
+async def get_organization(organization_id: int) -> OrganizationInfo:
+    org = await organization.get(organization_id)
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    return org
 
 
 @router.get('')
@@ -38,10 +45,10 @@ async def create(
     return
 
 
-@router.get('/{id}')
-async def show(id: int, current_user: UserInfo = Depends(authenticated_user)) -> OrganizationInfo:
-    org = await get(id)
-    if not org:
-        raise HTTPException(status_code=404, detail='Organization not found')
+@router.get('/{organization_id}')
+async def show(
+    org: OrganizationInfo = Depends(get_organization),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> OrganizationInfo:
     await check_authz(current_user, 'read', org)
     return org
