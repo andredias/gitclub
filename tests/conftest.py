@@ -11,9 +11,7 @@ from pytest import fixture
 os.environ['ENV'] = 'testing'
 
 from gitclub.main import app as _app  # noqa: E402
-from gitclub.models.user import get_all, insert  # noqa: E402
 from gitclub.resources import db  # noqa: E402
-from gitclub.schemas.user import UserInfo, UserInsert  # noqa: E402
 
 
 @fixture(scope='session')
@@ -69,32 +67,7 @@ async def client(app: FastAPI) -> AsyncIterable[AsyncClient]:
 
 
 @fixture(scope='session')
-async def users(session_app: FastAPI) -> list[UserInfo]:
-    """
-    Populate the database with users.
-    """
-
-    users_ = [
-        UserInsert(
-            name='Fulano de Tal',
-            email='fulano@email.com',
-            password='Paulo Paulada Power',
-        ),
-        UserInsert(
-            name='Beltrano de Tal',
-            email='beltrano@email.com',
-            password='abcdefgh1234567890',
-        ),
-    ]
-
-    for user in users_:
-        await insert(user)
-
-    return await get_all()
-
-
-@fixture
-async def test_dataset(app: FastAPI) -> dict[str, dict[str, int]]:
+async def test_dataset(session_app: FastAPI) -> dict[str, dict[str, int]]:
     """
     Populate the database with users, organizations, repositories and relationships.
     """
