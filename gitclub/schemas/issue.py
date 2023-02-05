@@ -8,5 +8,11 @@ class IssueInsert(BaseModel):
     creator_id: int
 
 
+class IssuePatch(BaseModel):
+    title: str | None
+    closed: bool | None
+    creator_id: int | None
+
+
 class IssueInfo(IssueInsert):
     id: int

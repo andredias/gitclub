@@ -82,7 +82,14 @@ async def load_test_dataset() -> dict[str, dict[str, int]]:
                 repository_id=repositories['abbey_road'],
                 creator_id=users['ringo'],  # differs from the original gitclub example
             )
-        )
+        ),
+        'traffic': await issue.insert(
+            IssueInsert(
+                title='Too much traffic',
+                repository_id=repositories['paperwork'],
+                creator_id=users['sully'],
+            )
+        ),
     }
 
     # https://github.com/osohq/oso/blob/70965f2277d7167c38d3641140e6e97dec78e3bf/languages/python/sqlalchemy-oso/tests/test_roles.py#L132-L133

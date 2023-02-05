@@ -25,7 +25,7 @@ async def insert(repository: RepositoryInsert) -> int:
 
 async def get(id: int, organization_id: int | None = None) -> RepositoryInfo | None:
     query = Repository.select(Repository.c.id == id)
-    if organization_id:
+    if organization_id is not None:
         query = query.where(Repository.c.organization_id == organization_id)
     result = await db.fetch_one(query)
     return RepositoryInfo(**result._mapping) if result else None

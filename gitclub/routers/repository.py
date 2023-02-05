@@ -12,6 +12,18 @@ from .organization import get_organization
 router = APIRouter(prefix='/organizations/{organization_id}/repositories', tags=['repositories'])
 
 
+async def get_repository(
+    repository_id: int,
+    org: OrganizationInfo = Depends(get_organization),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> RepositoryInfo:
+    repository = await get(repository_id, organization_id=org.id)
+    if not repository:
+        raise HTTPException(status_code=404, detail='Repository not found')
+    await check_authz(current_user, 'read', repository)
+    return repository
+
+
 @router.get('')
 async def list_repositories(
     org: OrganizationInfo = Depends(get_organization),
@@ -45,15 +57,11 @@ async def create_repository(
 
 @router.get('/{repository_id}')
 async def show(
-    repository_id: int,
-    org: OrganizationInfo = Depends(get_organization),
+    repository: RepositoryInfo = Depends(get_repository),
     current_user: UserInfo = Depends(authenticated_user),
 ) -> RepositoryInfo:
     """
     Show a repository
     """
-    repository = await get(repository_id, organization_id=org.id)
-    if not repository:
-        raise HTTPException(status_code=404, detail='Repository not found')
     await check_authz(current_user, 'read', repository)
     return repository

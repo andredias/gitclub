@@ -101,3 +101,8 @@ async def test_dataset(app: FastAPI) -> dict[str, dict[str, int]]:
     from gitclub.initial_data import load_test_dataset
 
     return await load_test_dataset()
+
+
+@fixture(scope='session', autouse=True)
+def faker_seed() -> int:
+    return 0
