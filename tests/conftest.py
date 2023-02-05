@@ -70,6 +70,8 @@ async def client(app: FastAPI) -> AsyncIterable[AsyncClient]:
 async def test_dataset(session_app: FastAPI) -> dict[str, dict[str, int]]:
     """
     Populate the database with users, organizations, repositories and relationships.
+    The dataset is common to all tests because it is created before a transaction is
+    wrapped around each test.
     """
     from gitclub.initial_data import load_test_dataset
 
