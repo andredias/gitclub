@@ -8,8 +8,8 @@ from .models.issue import IssueInfo
 from .models.organization import Organization, OrganizationInfo
 from .models.repository import RepositoryInfo
 from .models.user import UserInfo
-from .models.user_organization import user_role_in_organization
-from .models.user_repository import user_role_in_repository
+from .models.user_organization import get_user_role_in_organization
+from .models.user_repository import get_user_role_in_repository
 
 
 # User Roles and actions
@@ -80,7 +80,7 @@ async def authorized(actor: BaseModel, action: str, resource: ResourceType) -> b
             return action in user_actions[role]
 
         case OrganizationInfo(id=organization_id), UserInfo(id=user_id):
-            role = await user_role_in_organization(user_id, organization_id)
+            role = await get_user_role_in_organization(user_id, organization_id)
             return bool(role and action in org_actions[role])
 
         # case Organization, UserInfo(id=user_id) doesn't work
@@ -92,16 +92,16 @@ async def authorized(actor: BaseModel, action: str, resource: ResourceType) -> b
         case RepositoryInfo(id=repository_id, organization_id=organization_id), UserInfo(
             id=user_id
         ):
-            role = await user_role_in_repository(
+            role = await get_user_role_in_repository(
                 user_id, repository_id
-            ) or await user_role_in_organization(user_id, organization_id)
+            ) or await get_user_role_in_organization(user_id, organization_id)
             return bool(role and action in repo_actions[role])
 
         case IssueInfo(repository_id=repository_id, creator_id=creator_id), UserInfo(id=user_id):
             role = (
                 user_id == creator_id
                 and 'creator'
-                or await user_role_in_repository(user_id, repository_id)
+                or await get_user_role_in_repository(user_id, repository_id)
             )
             return bool(role and action in issue_actions[role])
 

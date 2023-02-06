@@ -5,7 +5,7 @@ from ..authorization import check_authz
 from ..models import organization
 from ..models.organization import Organization, OrganizationInfo, OrganizationInsert
 from ..models.user import UserInfo
-from ..models.user_organization import UserOrganizationInfo, user_organizations
+from ..models.user_organization import UserOrganizationInfo, get_user_organizations
 from ..models.user_organization import insert as insert_user_organization
 
 router = APIRouter(prefix='/organizations', tags=['organizations'])
@@ -28,7 +28,7 @@ async def list_organizations(
     # it doesn't make sense to check authorization for each organization the user is a member of
     # because if he/she is a member, he/she has read access to it at least
     # result = [org for org in organizations if await authorized(current_user, 'read', org)]  # noqa: ERA001, E501
-    return await user_organizations(current_user.id)
+    return await get_user_organizations(current_user.id)
 
 
 @router.post('', status_code=201)
