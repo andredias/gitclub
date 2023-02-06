@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from pytest import mark, raises
 
-from gitclub.schemas import diff_models
-from gitclub.schemas.user import UserInsert, UserPatch, check_password
+from gitclub.models import diff_models
+from gitclub.models.user import UserInsert, UserPatch, check_password
 
 
 def test_diff_models() -> None:

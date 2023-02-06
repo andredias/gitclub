@@ -1,6 +1,6 @@
 from httpx import AsyncClient
 
-from gitclub.schemas.repository import RepositoryInfo, RepositoryInsert
+from gitclub.models.repository import RepositoryInfo, RepositoryInsert
 
 from ..utils import logged_session
 

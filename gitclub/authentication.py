@@ -2,8 +2,7 @@ import re
 
 from fastapi import Cookie, Header, HTTPException
 
-from .models.user import get
-from .schemas.user import UserInfo
+from .models.user import UserInfo, get
 from .sessions import is_valid_csrf, session_exists
 
 

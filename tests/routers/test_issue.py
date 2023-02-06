@@ -1,6 +1,6 @@
 from httpx import AsyncClient
 
-from gitclub.schemas.issue import IssueInfo, IssueInsert
+from gitclub.models.issue import IssueInfo, IssueInsert
 
 from ..utils import logged_session
 

@@ -1,7 +1,7 @@
+from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Table
 
 from ..resources import db
-from ..schemas.organization import OrganizationInfo, OrganizationInsert
 from . import metadata, random_id
 
 Organization = Table(
@@ -12,6 +12,16 @@ Organization = Table(
     Column('base_repo_role', String),
     Column('billing_address', String),
 )
+
+
+class OrganizationInsert(BaseModel):
+    name: str
+    base_repo_role: str
+    billing_address: str
+
+
+class OrganizationInfo(OrganizationInsert):
+    id: int
 
 
 async def insert(organization: OrganizationInsert) -> int:

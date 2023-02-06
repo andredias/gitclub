@@ -1,7 +1,7 @@
+from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, String, Table, UniqueConstraint
 
 from ..resources import db
-from ..schemas.repository import RepositoryInfo, RepositoryInsert
 from . import metadata, random_id
 from .organization import Organization
 
@@ -13,6 +13,18 @@ Repository = Table(
     Column('organization_id', ForeignKey(Organization.c.id), nullable=False),
     UniqueConstraint('name', 'organization_id'),
 )
+
+
+class RepositoryInsert(BaseModel):
+    name: str
+
+
+class RepositoryInsert2(RepositoryInsert):
+    organization_id: int
+
+
+class RepositoryInfo(RepositoryInsert2):
+    id: int
 
 
 async def insert(repository: RepositoryInsert) -> int:

@@ -3,12 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from ..authentication import authenticated_user
 from ..authorization import check_authz
 from ..models import organization
-from ..models.organization import Organization
+from ..models.organization import Organization, OrganizationInfo, OrganizationInsert
+from ..models.user import UserInfo
+from ..models.user_organization import UserOrganizationInfo, user_organizations
 from ..models.user_organization import insert as insert_user_organization
-from ..models.user_organization import user_organizations
-from ..schemas.organization import OrganizationInfo, OrganizationInsert
-from ..schemas.user import UserInfo
-from ..schemas.user_organization import UserOrganizationInfo
 
 router = APIRouter(prefix='/organizations', tags=['organizations'])
 

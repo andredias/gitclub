@@ -1,6 +1,6 @@
 from httpx import AsyncClient
 
-from gitclub.schemas.organization import OrganizationInsert
+from gitclub.models.organization import OrganizationInsert
 
 from ..utils import logged_session
 

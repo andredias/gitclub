@@ -1,6 +1,8 @@
 from pathlib import Path
 from secrets import randbelow
+from typing import Any
 
+from pydantic import BaseModel
 from sqlalchemy import MetaData
 
 metadata = MetaData()
@@ -24,3 +26,14 @@ def random_id() -> int:
        This leads to poor test designs that should be avoided.
     """
     return randbelow(MAX_ID)
+
+
+def diff_models(from_: BaseModel, to_: BaseModel) -> dict[str, Any]:
+    """
+    Return a dict with differences of the second in relation to the first model.
+    Useful for getting only the fields that have changed before an update,
+    for example.
+    """
+    from_dict = from_.dict()
+    to_dict = to_.dict(exclude_unset=True)
+    return {k: v for k, v in to_dict.items() if from_dict.get(k) != v}

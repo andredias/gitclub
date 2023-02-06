@@ -2,11 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 
 from ..authentication import authenticated_user
 from ..authorization import check_authz
-from ..models.issue import get, get_repository_issues, insert, update
+from ..models.issue import (
+    IssueInfo,
+    IssueInsert,
+    IssuePatch,
+    get,
+    get_repository_issues,
+    insert,
+    update,
+)
+from ..models.repository import RepositoryInfo
+from ..models.user import UserInfo
 from ..resources import db
-from ..schemas.issue import IssueInfo, IssueInsert, IssuePatch
-from ..schemas.repository import RepositoryInfo
-from ..schemas.user import UserInfo
 from .repository import get_repository
 
 router = APIRouter(

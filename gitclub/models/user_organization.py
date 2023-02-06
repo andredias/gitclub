@@ -1,10 +1,9 @@
+from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, String, Table
 
 from ..resources import db
-from ..schemas.organization import OrganizationInfo
-from ..schemas.user_organization import UserOrganizationInfo
 from . import metadata
-from .organization import Organization
+from .organization import Organization, OrganizationInfo
 from .user import User
 
 UserOrganization = Table(
@@ -14,6 +13,12 @@ UserOrganization = Table(
     Column('organization_id', ForeignKey(Organization.c.id), primary_key=True),
     Column('role', String, nullable=False),
 )
+
+
+class UserOrganizationInfo(BaseModel):
+    user_id: int
+    organization_id: int
+    role: str
 
 
 async def insert(user_organization: UserOrganizationInfo) -> None:

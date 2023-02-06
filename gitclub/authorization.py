@@ -4,15 +4,12 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy import Table
 
-from .models.organization import Organization
+from .models.issue import IssueInfo
+from .models.organization import Organization, OrganizationInfo
+from .models.repository import RepositoryInfo
+from .models.user import UserInfo
 from .models.user_organization import user_role_in_organization
-from .models.repository import Repository
 from .models.user_repository import user_role_in_repository
-
-from .schemas.user import UserInfo
-from .schemas.repository import RepositoryInfo
-from .schemas.organization import OrganizationInfo
-from .schemas.issue import IssueInfo
 
 
 # User Roles and actions

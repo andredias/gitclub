@@ -11,12 +11,12 @@ from .models import (
     user_organization,
     user_repository,
 )
-from .schemas.issue import IssueInsert
-from .schemas.organization import OrganizationInsert
-from .schemas.repository import RepositoryInsert2
-from .schemas.user import UserInsert
-from .schemas.user_organization import UserOrganizationInfo
-from .schemas.user_repository import UserRepositoryInfo
+from .models.issue import IssueInsert
+from .models.organization import OrganizationInsert
+from .models.repository import RepositoryInsert2
+from .models.user import UserInsert
+from .models.user_organization import UserOrganizationInfo
+from .models.user_repository import UserRepositoryInfo
 
 
 async def new_user(

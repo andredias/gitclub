@@ -1,7 +1,7 @@
+from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, String, Table
 
 from ..resources import db
-from ..schemas.user_repository import UserRepositoryInfo
 from . import metadata
 from .repository import Repository
 from .user import User
@@ -13,6 +13,12 @@ UserRepository = Table(
     Column('repository_id', ForeignKey(Repository.c.id), primary_key=True),
     Column('role', String, nullable=False),
 )
+
+
+class UserRepositoryInfo(BaseModel):
+    user_id: int
+    repository_id: int
+    role: str
 
 
 async def insert(user_repository: UserRepositoryInfo) -> None:

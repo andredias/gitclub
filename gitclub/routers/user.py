@@ -2,10 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ..authentication import authenticated_user
 from ..authorization import authorized, check_authz
-from ..models.user import get
+from ..models.repository import RepositoryInfo
+from ..models.user import UserInfo, get
 from ..models.user_repository import user_repositories
-from ..schemas.repository import RepositoryInfo
-from ..schemas.user import UserInfo
 
 router = APIRouter(prefix='/users', tags=['users'])
 

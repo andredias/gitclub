@@ -2,11 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 
 from ..authentication import authenticated_user
 from ..authorization import authorized, check_authz
-from ..models.repository import get, get_organization_repositories, insert
+from ..models.organization import OrganizationInfo
+from ..models.repository import (
+    RepositoryInfo,
+    RepositoryInsert,
+    RepositoryInsert2,
+    get,
+    get_organization_repositories,
+    insert,
+)
+from ..models.user import UserInfo
 from ..resources import db
-from ..schemas.organization import OrganizationInfo
-from ..schemas.repository import RepositoryInfo, RepositoryInsert, RepositoryInsert2
-from ..schemas.user import UserInfo
 from .organization import get_organization
 
 router = APIRouter(prefix='/organizations/{organization_id}/repositories', tags=['repositories'])

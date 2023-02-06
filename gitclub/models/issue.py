@@ -1,7 +1,7 @@
+from pydantic import BaseModel
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 
 from ..resources import db
-from ..schemas.issue import IssueInfo, IssueInsert, IssuePatch
 from . import metadata, random_id
 from .repository import Repository
 from .user import User
@@ -15,6 +15,23 @@ Issue = Table(
     Column('repository_id', ForeignKey(Repository.c.id), nullable=False),
     Column('creator_id', ForeignKey(User.c.id), nullable=False),
 )
+
+
+class IssueInsert(BaseModel):
+    title: str
+    closed: bool = False
+    repository_id: int
+    creator_id: int
+
+
+class IssuePatch(BaseModel):
+    title: str | None
+    closed: bool | None
+    creator_id: int | None
+
+
+class IssueInfo(IssueInsert):
+    id: int
 
 
 async def insert(issue: IssueInsert) -> int:
