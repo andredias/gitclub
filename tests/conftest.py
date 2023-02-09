@@ -1,7 +1,7 @@
 import os
+from collections.abc import AsyncIterable
 from pathlib import Path
 from subprocess import check_call
-from typing import AsyncIterable
 
 from asgi_lifespan import LifespanManager
 from fastapi import FastAPI

@@ -4,7 +4,7 @@ from gitclub.models import issue, organization, repository, user
 TestData = dict[str, dict[str, int]]
 
 
-async def test_authorization(test_dataset: TestData) -> None:
+async def test_authorization(test_dataset: TestData) -> None:  # noqa: PLR0915
     john = await user.get(test_dataset['users']['john'])
     paul = await user.get(test_dataset['users']['paul'])
     sully = await user.get(test_dataset['users']['sully'])
