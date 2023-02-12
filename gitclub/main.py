@@ -3,14 +3,15 @@ from fastapi.responses import ORJSONResponse
 
 from . import config
 from .resources import shutdown, startup
-from .routers import hello, issue, organization, repository, user
+from .routers import hello, issue, login, organization, repository, user
 
 routers = [
     hello.router,
-    user.router,
+    login.router,
+    issue.router,
     organization.router,
     repository.router,
-    issue.router,
+    user.router,
 ]
 
 app = FastAPI(
