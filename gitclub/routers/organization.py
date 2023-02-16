@@ -1,12 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from asyncpg.exceptions import UniqueViolationError
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 
 from ..authentication import authenticated_user
-from ..authorization import check_authz
-from ..models import organization
+from ..authorization import authorized, check_authz, check_resource_role
+from ..models import organization, user
 from ..models.organization import Organization, OrganizationInfo, OrganizationInsert
 from ..models.user import UserInfo
-from ..models.user_organization import UserOrganizationInfo, get_user_organizations
+from ..models.user_organization import (
+    UserOrganizationInfo,
+    delete_user_organization,
+    get_members_of_organization,
+    get_non_members_of_organization,
+    get_user_organizations,
+    get_user_role_in_organization,
+    update_user_organization,
+)
 from ..models.user_organization import insert as insert_user_organization
+from ..resources import db
 
 router = APIRouter(prefix='/organizations', tags=['organizations'])
 
@@ -32,6 +42,7 @@ async def list_organizations(
 
 
 @router.post('', status_code=201)
+@db.transaction()
 async def create(
     new_org: OrganizationInsert,
     response: Response,
@@ -52,3 +63,99 @@ async def show(
 ) -> OrganizationInfo:
     await check_authz(current_user, 'read', org)
     return org
+
+
+# the remaining endpoints were originally in
+# gitclub/flask-alchemy/app/routes/role_assignment.py
+
+# was: /unassigned_users
+@router.get('/{organization_id}/non_members')
+async def list_non_members(
+    org: OrganizationInfo = Depends(get_organization),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> list[UserInfo]:
+    """
+    List all users who aren't members of the organization.
+    """
+    await check_authz(current_user, 'list_role_assignments', org)
+    users = await get_non_members_of_organization(org.id)
+    return [user for user in users if await authorized(current_user, 'read_profile', user)]
+
+
+# was: /role_assignments
+@router.get('/{organization_id}/members')
+async def list_members(
+    org: OrganizationInfo = Depends(get_organization),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> list[UserInfo]:
+    """
+    List all members of the organization.
+    """
+    await check_authz(current_user, 'list_role_assignments', org)
+    users = await get_members_of_organization(org.id)
+    return [user for user in users if await authorized(current_user, 'read_profile', user)]
+
+
+# it was originally POST /role_assignments
+@router.post('/{organization_id}/members', status_code=201)
+@db.transaction()
+async def add_member(
+    response: Response,
+    user_id: int = Body(...),
+    role: str = Body(...),
+    org: OrganizationInfo = Depends(get_organization),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> UserOrganizationInfo:
+    """
+    Add a user to the organization.
+    """
+    await check_authz(current_user, 'create_role_assignments', org)
+    target_user = await user.get(user_id)
+    if not target_user:
+        raise HTTPException(status_code=404, detail='User not found')
+    await check_authz(current_user, 'read_profile', target_user)
+    check_resource_role('organization', role)
+    user_org = UserOrganizationInfo(organization_id=org.id, user_id=target_user.id, role=role)
+    try:
+        await insert_user_organization(user_org)
+    except UniqueViolationError:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail='Member already exists') from None
+    response.headers['Location'] = f'{router.prefix}/{org.id}/members/{target_user.id}'
+    return user_org
+
+
+@router.put('/{organization_id}/members/{user_id}')
+@db.transaction()
+async def update_member_role(
+    user_id: int,
+    role: str = Body(embed=True),
+    org: OrganizationInfo = Depends(get_organization),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> UserOrganizationInfo:
+    """
+    Update the role of a user in the organization.
+    """
+    await check_authz(current_user, 'update_role_assignments', org)
+    current_role = await get_user_role_in_organization(user_id=user_id, organization_id=org.id)
+    if not current_role:
+        raise HTTPException(status_code=404, detail='Member not found')
+    if role != current_role:
+        check_resource_role('organization', role)
+        await update_user_organization(user_id, org.id, role)
+    return UserOrganizationInfo(user_id=user_id, organization_id=org.id, role=role)
+
+
+@router.delete('/{organization_id}/members/{user_id}', status_code=204)
+@db.transaction()
+async def remove_member(
+    user_id: int,
+    org: OrganizationInfo = Depends(get_organization),
+    current_user: UserInfo = Depends(authenticated_user),
+) -> None:
+    """
+    Delete the role of a user in the organization.
+    """
+    if current_user.id != user_id:
+        await check_authz(current_user, 'delete_role_assignments', org)
+    await delete_user_organization(user_id, org.id)
+    return
