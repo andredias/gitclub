@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 
 from ..authentication import authenticated_user
 from ..authorization import check_authz
@@ -34,13 +34,15 @@ async def list_organizations(
 @router.post('', status_code=201)
 async def create(
     new_org: OrganizationInsert,
+    response: Response,
     current_user: UserInfo = Depends(authenticated_user),
-) -> None:
+) -> OrganizationInfo:
     await check_authz(current_user, 'create', Organization)
     org_id = await organization.insert(new_org)
     user_org = UserOrganizationInfo(organization_id=org_id, user_id=current_user.id, role='owner')
     await insert_user_organization(user_org)
-    return
+    response.headers['Location'] = f'{router.prefix}/{org_id}'
+    return OrganizationInfo(id=org_id, **new_org.dict())
 
 
 @router.get('/{organization_id}')

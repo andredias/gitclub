@@ -46,6 +46,10 @@ async def test_create_organization(test_dataset: TestData, client: AsyncClient) 
     )
     await logged_session(client, john)
     resp = await client.post(url, json=org.dict())
+    assert resp.status_code == 201
+    data = resp.json()
+    assert org
+    assert resp.headers['Location'] == f'/organizations/{data["id"]}'
 
 
 async def test_show_organization(test_dataset: TestData, client: AsyncClient) -> None:
