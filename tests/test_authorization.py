@@ -116,6 +116,9 @@ async def test_authorization(test_dataset: TestData) -> None:  # noqa: PLR0915
         assert not await authorized(mike, action, ticket)
         assert not await authorized(sully, action, ticket)
 
+    with pytest.raises(NotImplementedError):
+        await authorized(beatles, 'foo', beatles)
+
 
 def test_resource_roles() -> None:
     assert resource_roles('user') == {'reader', 'owner'}
