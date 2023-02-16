@@ -9,8 +9,8 @@ from ..models.user import UserInfo
 from ..models.user_organization import (
     UserOrganizationInfo,
     delete_user_organization,
-    get_members_of_organization,
-    get_non_members_of_organization,
+    get_organization_members,
+    get_organization_non_members,
     get_user_organizations,
     get_user_role_in_organization,
     update_user_organization,
@@ -69,7 +69,7 @@ async def show(
 # gitclub/flask-alchemy/app/routes/role_assignment.py
 
 # was: /unassigned_users
-@router.get('/{organization_id}/non_members')
+@router.get('/{organization_id}/non-members')
 async def list_non_members(
     org: OrganizationInfo = Depends(get_organization),
     current_user: UserInfo = Depends(authenticated_user),
@@ -78,7 +78,7 @@ async def list_non_members(
     List all users who aren't members of the organization.
     """
     await check_authz(current_user, 'list_role_assignments', org)
-    users = await get_non_members_of_organization(org.id)
+    users = await get_organization_non_members(org.id)
     return [user for user in users if await authorized(current_user, 'read_profile', user)]
 
 
@@ -92,7 +92,7 @@ async def list_members(
     List all members of the organization.
     """
     await check_authz(current_user, 'list_role_assignments', org)
-    users = await get_members_of_organization(org.id)
+    users = await get_organization_members(org.id)
     return [user for user in users if await authorized(current_user, 'read_profile', user)]
 
 

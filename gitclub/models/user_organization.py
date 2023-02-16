@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from sqlalchemy import Column, ForeignKey, String, Table
+from sqlalchemy import Column, ForeignKey, String, Table, and_, join
 
 from ..resources import db
 from . import metadata
@@ -45,7 +45,7 @@ async def get_user_organizations(user_id: int) -> list[OrganizationInfo]:
     return [OrganizationInfo(**row._mapping) for row in result]
 
 
-async def get_members_of_organization(organization_id: int) -> list[UserInfo]:
+async def get_organization_members(organization_id: int) -> list[UserInfo]:
     query = User.select().where(
         User.c.id == UserOrganization.c.user_id,
         UserOrganization.c.organization_id == organization_id,
@@ -54,13 +54,21 @@ async def get_members_of_organization(organization_id: int) -> list[UserInfo]:
     return [UserInfo(**row._mapping) for row in result]
 
 
-async def get_non_members_of_organization(organization_id: int) -> list[UserInfo]:
+async def get_organization_non_members(organization_id: int) -> list[UserInfo]:
+    left_join = join(
+        User,
+        UserOrganization,
+        and_(
+            User.c.id == UserOrganization.c.user_id,
+            UserOrganization.c.organization_id == organization_id,
+        ),
+        isouter=True,
+    )
     query = (
         User.select()
-        .distinct()
+        .select_from(left_join)
         .where(
-            User.c.id == UserOrganization.c.user_id,
-            UserOrganization.c.organization_id != organization_id,
+            UserOrganization.c.organization_id == None,  # noqa: E711
         )
     )
     result = await db.fetch_all(query)

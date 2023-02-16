@@ -78,6 +78,54 @@ async def test_show_organization(test_dataset: TestData, client: AsyncClient) ->
     assert resp.status_code == 404
 
 
+async def test_list_members(test_dataset: TestData, client: AsyncClient) -> None:
+    john = test_dataset['users']['john']
+    fulano = test_dataset['users']['fulano']
+    beatles = test_dataset['organizations']['beatles']
+    url = '/organizations/{organization_id}/members'
+
+    # unauthenticated user access
+    resp = await client.get(url.format(organization_id=beatles))
+    assert resp.status_code == status.HTTP_401_UNAUTHORIZED
+
+    # john's organizations
+    await logged_session(client, john)
+    resp = await client.get(url.format(organization_id=beatles))
+    assert resp.status_code == status.HTTP_200_OK
+    members = resp.json()
+    assert len(members) == 3
+    assert {m['name'] for m in members} == {'john', 'paul', 'ringo'}
+
+    # fulano shouldn't be able to see beatles members
+    await logged_session(client, fulano)
+    resp = await client.get(url.format(organization_id=beatles))
+    assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+
+async def test_list_non_members(test_dataset: TestData, client: AsyncClient) -> None:
+    john = test_dataset['users']['john']
+    fulano = test_dataset['users']['fulano']
+    beatles = test_dataset['organizations']['beatles']
+    url = '/organizations/{organization_id}/non-members'
+
+    # unauthenticated user access
+    resp = await client.get(url.format(organization_id=beatles))
+    assert resp.status_code == status.HTTP_401_UNAUTHORIZED
+
+    # john's organizations
+    await logged_session(client, john)
+    resp = await client.get(url.format(organization_id=beatles))
+    assert resp.status_code == status.HTTP_200_OK
+    non_members = resp.json()
+    assert len(non_members) == 5
+    assert {m['name'] for m in non_members} == {'mike', 'sully', 'randall', 'admin', 'fulano'}
+
+    # fulano shouldn't be able to see beatles non_members
+    await logged_session(client, fulano)
+    resp = await client.get(url.format(organization_id=beatles))
+    assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+
 async def test_add_member(test_dataset: TestData, client: AsyncClient) -> None:
     john = test_dataset['users']['john']
     paul = test_dataset['users']['paul']
@@ -102,6 +150,10 @@ async def test_add_member(test_dataset: TestData, client: AsyncClient) -> None:
     # invalid role
     resp = await client.post(url, json={'user_id': fulano, 'role': 'maintainer'})
     assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    # inexistent user
+    resp = await client.post(url, json={'user_id': 0, 'role': 'member'})
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
 
     # john adds fulano as a member
     resp = await client.post(url, json={'user_id': fulano, 'role': 'member'})
@@ -153,6 +205,10 @@ async def test_update_member_role(test_dataset: TestData, client: AsyncClient) -
     assert data['user_id'] == paul
     assert data['role'] == 'owner'
     assert data['organization_id'] == beatles
+
+    # john updates paul's role to same role
+    resp = await client.put(url, json={'role': 'owner'})
+    assert resp.status_code == status.HTTP_200_OK
 
 
 async def test_remove_member(test_dataset: TestData, client: AsyncClient) -> None:

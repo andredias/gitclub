@@ -26,10 +26,10 @@ class OrganizationInfo(OrganizationInsert):
 
 async def insert(organization: OrganizationInsert) -> int:
     fields = organization.dict()
-    id_ = fields['id'] = random_id()
+    organization_id = fields['id'] = random_id()
     stmt = Organization.insert().values(fields)
     await db.execute(stmt)
-    return id_  # noqa: RET504
+    return organization_id  # noqa: RET504
 
 
 async def get(id_: int) -> OrganizationInfo | None:
