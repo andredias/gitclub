@@ -56,7 +56,7 @@ repo_actions['owner'] = repo_actions['admin']
 
 issue_actions = {}
 # reader and maintainer depends on user's role in the repository
-# not exactly equal to the original gitclug example
+# not exactly equal to the original gitclub example
 issue_actions['reader'] = {'read'}
 issue_actions['maintainer'] = issue_actions['reader'] | {'update', 'close'}
 issue_actions['creator'] = issue_actions['maintainer'] | {'reopen'}
@@ -111,4 +111,23 @@ async def authorized(actor: BaseModel, action: str, resource: ResourceType) -> b
 async def check_authz(actor: BaseModel, action: str, resource: ResourceType) -> bool:
     if not await authorized(actor, action, resource):
         raise HTTPException(403)
+    return True
+
+
+def resource_roles(resource: str) -> set[str]:
+    match resource:
+        case 'user':
+            return set(user_actions.keys())
+        case 'organization':
+            return set(org_actions.keys())
+        case 'repository':
+            return set(repo_actions.keys()) - set(org_actions.keys())
+        case 'issue':
+            return set(issue_actions.keys()) - set(repo_actions.keys())
+    raise NotImplementedError(f'authorization not implemented for {resource}')
+
+
+def check_resource_role(resource: str, role: str) -> bool:
+    if role not in resource_roles(resource):
+        raise HTTPException(422, f'invalid role {role} for resource {resource}')
     return True

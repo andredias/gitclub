@@ -1,4 +1,15 @@
-from gitclub.authorization import authorized, issue_actions, org_actions, repo_actions, user_actions
+import pytest
+from fastapi import HTTPException
+
+from gitclub.authorization import (
+    authorized,
+    check_resource_role,
+    issue_actions,
+    org_actions,
+    repo_actions,
+    resource_roles,
+    user_actions,
+)
 from gitclub.models import issue, organization, repository, user
 
 TestData = dict[str, dict[str, int]]
@@ -104,3 +115,20 @@ async def test_authorization(test_dataset: TestData) -> None:  # noqa: PLR0915
         assert await authorized(ringo, action, ticket)
         assert not await authorized(mike, action, ticket)
         assert not await authorized(sully, action, ticket)
+
+
+def test_resource_roles() -> None:
+    assert resource_roles('user') == {'reader', 'owner'}
+    assert resource_roles('organization') == {'member', 'owner'}
+    assert resource_roles('repository') == {'reader', 'maintainer', 'admin'}
+    assert resource_roles('issue') == {'creator'}
+    with pytest.raises(NotImplementedError):
+        resource_roles('foo')
+
+
+def test_check_resource_roles() -> None:
+    assert check_resource_role('user', 'reader')
+    with pytest.raises(HTTPException):
+        check_resource_role('user', 'foo')
+    with pytest.raises(NotImplementedError):
+        check_resource_role('foo', 'reader')
