@@ -7,6 +7,7 @@ from ..models import organization, user
 from ..models.organization import Organization, OrganizationInfo, OrganizationInsert
 from ..models.user import UserInfo
 from ..models.user_organization import (
+    OrganizationMemberInfo,
     UserOrganizationInfo,
     delete_user_organization,
     get_organization_members,
@@ -87,13 +88,17 @@ async def list_non_members(
 async def list_members(
     org: OrganizationInfo = Depends(get_organization),
     current_user: UserInfo = Depends(authenticated_user),
-) -> list[UserInfo]:
+) -> list[OrganizationMemberInfo]:
     """
     List all members of the organization.
     """
     await check_authz(current_user, 'list_role_assignments', org)
-    users = await get_organization_members(org.id)
-    return [user for user in users if await authorized(current_user, 'read_profile', user)]
+    members = await get_organization_members(org.id)
+    return [
+        user
+        for user in members
+        if await authorized(current_user, 'read_profile', UserInfo(**user.dict()))
+    ]
 
 
 # it was originally POST /role_assignments

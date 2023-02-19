@@ -21,6 +21,10 @@ class UserOrganizationInfo(BaseModel):
     role: str
 
 
+class OrganizationMemberInfo(UserInfo):
+    role: str
+
+
 async def insert(user_organization: UserOrganizationInfo) -> None:
     stmt = UserOrganization.insert().values(user_organization.dict())
     await db.execute(stmt)
@@ -45,13 +49,19 @@ async def get_user_organizations(user_id: int) -> list[OrganizationInfo]:
     return [OrganizationInfo(**row._mapping) for row in result]
 
 
-async def get_organization_members(organization_id: int) -> list[UserInfo]:
-    query = User.select().where(
-        User.c.id == UserOrganization.c.user_id,
-        UserOrganization.c.organization_id == organization_id,
-    )
-    result = await db.fetch_all(query)
-    return [UserInfo(**row._mapping) for row in result]
+async def get_organization_members(organization_id: int) -> list[OrganizationMemberInfo]:
+    query = """
+select
+    u.id, u.name, u.email, uo.role
+from
+    "user" u
+inner join
+    user_organization uo
+on
+    u.id = uo.user_id and uo.organization_id = :organization_id
+"""
+    result = await db.fetch_all(query, values={'organization_id': organization_id})
+    return [OrganizationMemberInfo(**row._mapping) for row in result]
 
 
 async def get_organization_non_members(organization_id: int) -> list[UserInfo]:
