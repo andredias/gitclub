@@ -21,6 +21,10 @@ class UserRepositoryInfo(BaseModel):
     role: str
 
 
+class RepositoryMemberInfo(UserInfo):
+    role: str
+
+
 async def insert(user_repository: UserRepositoryInfo) -> None:
     stmt = UserRepository.insert().values(user_repository.dict())
     await db.execute(stmt)
@@ -59,22 +63,30 @@ where
     return [UserInfo(**row._mapping) for row in result]
 
 
-async def get_repository_members(repository_id: int) -> list[UserInfo]:
-    query = (
-        User.select()
-        .distinct()
-        .where(User.c.id == UserRepository.c.user_id)
-        .where(UserRepository.c.repository_id == repository_id)
-    )
-    result = await db.fetch_all(query)
-    return [UserInfo(**row._mapping) for row in result]
+async def get_repository_members(repository_id: int) -> list[RepositoryMemberInfo]:
+    query = """
+select
+    u.id, u.name, u.email, ur.role
+from
+    "user" u
+inner join
+    user_repository ur
+on
+    u.id = ur.user_id and ur.repository_id = :repository_id
+"""
+    result = await db.fetch_all(query, values={'repository_id': repository_id})
+    return [RepositoryMemberInfo(**row._mapping) for row in result]
 
 
 async def update_user_repository(user_id: int, repository_id: int, role: str) -> None:
-    stmt = UserRepository.update().where(
-        UserRepository.c.user_id == user_id,
-        UserRepository.c.repository_id == repository_id,
-    ).values(role=role)
+    stmt = (
+        UserRepository.update()
+        .where(
+            UserRepository.c.user_id == user_id,
+            UserRepository.c.repository_id == repository_id,
+        )
+        .values(role=role)
+    )
     await db.execute(stmt)
     return
 

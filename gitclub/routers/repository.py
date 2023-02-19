@@ -15,6 +15,7 @@ from ..models.repository import (
 from ..models.user import UserInfo
 from ..models.user import get as get_user
 from ..models.user_repository import (
+    RepositoryMemberInfo,
     UserRepositoryInfo,
     delete_user_repository,
     get_repository_members,
@@ -105,7 +106,7 @@ async def list_non_members(
 async def list_members(
     repository: RepositoryInfo = Depends(get_repository),
     current_user: UserInfo = Depends(authenticated_user),
-) -> list[UserInfo]:
+) -> list[RepositoryMemberInfo]:
     """
     List all members of the repository.
     """
