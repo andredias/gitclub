@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+from functools import lru_cache
 from typing import Type
 
 from fastapi import HTTPException
@@ -114,6 +116,7 @@ async def check_authz(actor: BaseModel, action: str, resource: ResourceType) -> 
     return True
 
 
+@lru_cache
 def resource_roles(resource: str) -> set[str]:
     match resource:
         case 'user':
@@ -131,3 +134,16 @@ def check_resource_role(resource: str, role: str) -> bool:
     if role not in resource_roles(resource):
         raise HTTPException(422, f'invalid role {role} for resource {resource}')
     return True
+
+
+@lru_cache
+def action_to_roles(action: str, resource: str) -> Sequence[str]:
+    resources = {
+        'user': user_actions,
+        'organization': org_actions,
+        'repository': repo_actions,
+        'issue': issue_actions,
+    }
+    if resource not in resources:
+        raise NotImplementedError(f'authorization not implemented for {resource}')
+    return {role for role in resource_roles(resource) if action in resources[resource][role]}

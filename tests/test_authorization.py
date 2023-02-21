@@ -2,6 +2,7 @@ import pytest
 from fastapi import HTTPException
 
 from gitclub.authorization import (
+    action_to_roles,
     authorized,
     check_resource_role,
     issue_actions,
@@ -135,3 +136,24 @@ def test_check_resource_roles() -> None:
         check_resource_role('user', 'foo')
     with pytest.raises(NotImplementedError):
         check_resource_role('foo', 'reader')
+
+
+def test_action_to_roles() -> None:
+    assert action_to_roles('read_profile', 'user') == {'reader', 'owner'}
+    assert action_to_roles('update_profile', 'user') == {'owner'}
+
+    assert action_to_roles('read', 'organization') == {'member', 'owner'}
+    assert action_to_roles('create_repos', 'organization') == {'owner'}
+
+    assert action_to_roles('read', 'repository') == {'reader', 'maintainer', 'admin'}
+    assert action_to_roles('delete_role_assignments', 'repository') == {'admin'}
+
+    assert action_to_roles('read', 'issue') == {'creator'}
+    assert action_to_roles('update', 'issue') == {'creator'}
+
+    with pytest.raises(NotImplementedError):
+        action_to_roles('foo', 'bar')
+
+    # checks if lru_cache doesn't hold exceptions
+    with pytest.raises(NotImplementedError):
+        action_to_roles('foo', 'bar')
