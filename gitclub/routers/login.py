@@ -31,4 +31,3 @@ async def logout(response: Response, session_id: str = Cookie(None)) -> None:
         await delete_session(session_id)
     response.status_code = 204
     response.delete_cookie(key='session_id')
-    return

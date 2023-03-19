@@ -64,4 +64,3 @@ async def update(issue_id: int, patch: IssuePatch) -> None:
     fields = patch.dict(exclude_unset=True)
     stmt = Issue.update().where(Issue.c.id == issue_id).values(**fields)
     await db.execute(stmt)
-    return

@@ -100,10 +100,8 @@ async def update(user_id: int, patch: UserPatch) -> None:
         fields['password_hash'] = crypt_ctx.hash(password)
     stmt = User.update().where(User.c.id == user_id).values(**fields)
     await db.execute(stmt)
-    return
 
 
 async def delete(user_id: int) -> None:
     stmt = User.delete().where(User.c.id == user_id)
     await db.execute(stmt)
-    return

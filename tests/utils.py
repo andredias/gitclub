@@ -14,4 +14,3 @@ async def logged_session(client: AsyncClient, user_id: int | None = None) -> Non
         headers['x-csrf-token'] = create_csrf(session_id)
     client.cookies = cookies
     client.headers = headers
-    return

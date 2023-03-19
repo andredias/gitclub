@@ -1,6 +1,4 @@
-from collections.abc import Sequence
 from functools import lru_cache
-from typing import Type
 
 from fastapi import HTTPException
 from pydantic import BaseModel
@@ -12,7 +10,6 @@ from .models.repository import RepositoryInfo
 from .models.user import UserInfo
 from .models.user_organization import get_user_role_in_organization
 from .models.user_repository import get_user_role_in_repository
-
 
 # User Roles and actions
 
@@ -70,7 +67,7 @@ issue_actions['admin'] = issue_actions['creator']
 issue_actions['member'] = issue_actions['reader']
 issue_actions['owner'] = issue_actions['creator']
 
-ResourceType = BaseModel | Type[BaseModel | Table]
+ResourceType = BaseModel | type[BaseModel | Table]
 
 
 async def authorized(actor: BaseModel, action: str, resource: ResourceType) -> bool:

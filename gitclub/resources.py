@@ -25,7 +25,6 @@ async def shutdown() -> None:
 def show_config() -> None:
     config_vars = {key: getattr(config, key) for key in sorted(dir(config)) if key.isupper()}
     logger.debug(config_vars)
-    return
 
 
 async def connect_database(database: Database) -> None:
@@ -55,11 +54,9 @@ async def connect_redis() -> None:
     except RetryError:
         logger.error('Could not connect to Redis')
         raise
-    return
 
 
 async def disconnect_redis() -> None:
     if config.TESTING:
         await redis.flushdb()
     await redis.close()
-    return

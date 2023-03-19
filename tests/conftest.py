@@ -32,7 +32,7 @@ async def init_test_db() -> None:
     try:
         stmt = f"select 1 from pg_database where datname='{config.DB_NAME}'"
         db_exists = await db.execute(stmt)
-        if db_exists and os.getenv('RECREATE_DB', 0):
+        if db_exists and os.getenv('RECREATE_DB'):
             stmt = f'drop database {config.DB_NAME}'
             await db.execute(stmt)
             db_exists = False
@@ -42,7 +42,6 @@ async def init_test_db() -> None:
     finally:
         await db.disconnect()
     check_call('alembic upgrade head'.split(), cwd=Path(__file__).parent.parent)
-    return
 
 
 @fixture(scope='session')

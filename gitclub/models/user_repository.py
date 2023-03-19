@@ -28,7 +28,6 @@ class RepositoryMemberInfo(UserInfo):
 async def insert(user_repository: UserRepositoryInfo) -> None:
     stmt = UserRepository.insert().values(user_repository.dict())
     await db.execute(stmt)
-    return
 
 
 async def get_user_role_in_repository(user_id: int, repository_id: int) -> str | None:
@@ -88,7 +87,6 @@ async def update_user_repository(user_id: int, repository_id: int, role: str) ->
         .values(role=role)
     )
     await db.execute(stmt)
-    return
 
 
 async def delete_user_repository(user_id: int, repository_id: int) -> None:
@@ -97,4 +95,3 @@ async def delete_user_repository(user_id: int, repository_id: int) -> None:
         UserRepository.c.repository_id == repository_id,
     )
     await db.execute(stmt)
-    return

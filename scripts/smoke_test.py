@@ -24,7 +24,6 @@ def health_check() -> None:
     assert result.status_code == status.HTTP_200_OK
     assert result.json() == {'message': 'Hello World'}
     logger.info('Smoke test passed!')
-    return
 
 
 def run_smoke_test() -> None:

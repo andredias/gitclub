@@ -28,8 +28,8 @@ REDIS_PORT = os.getenv('REDIS_PORT', '6379')
 REDIS_URL = os.getenv('REDIS_URL') or f'redis://{REDIS_HOST}:{REDIS_PORT}'
 
 SECRET_KEY = bytes(os.getenv('SECRET_KEY', ''), 'utf-8') or secrets.token_bytes(32)
-SESSION_ID_LENGTH = int(os.getenv('SESSION_ID_LENGTH', 16))
+SESSION_ID_LENGTH = int(os.getenv('SESSION_ID_LENGTH', 16))  # noqa: PLW1508
 SESSION_LIFETIME = int(timedelta(days=7).total_seconds())
 
-PASSWORD_MIN_LENGTH = int(os.getenv('PASSWORD_MIN_LENGTH', 15))
-PASSWORD_MIN_VARIETY = int(os.getenv('PASSWORD_MIN_VARIETY', 5))
+PASSWORD_MIN_LENGTH = int(os.getenv('PASSWORD_MIN_LENGTH', 15))  # noqa: PLW1508
+PASSWORD_MIN_VARIETY = int(os.getenv('PASSWORD_MIN_VARIETY', 5))  # noqa: PLW1508

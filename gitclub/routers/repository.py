@@ -179,4 +179,3 @@ async def remove_member(
     if current_user.id != user_id:
         await check_authz(current_user, 'delete_role_assignments', repository)
     await delete_user_repository(user_id, repository.id)
-    return

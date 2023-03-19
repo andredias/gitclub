@@ -28,7 +28,6 @@ class OrganizationMemberInfo(UserInfo):
 async def insert(user_organization: UserOrganizationInfo) -> None:
     stmt = UserOrganization.insert().values(user_organization.dict())
     await db.execute(stmt)
-    return
 
 
 async def get_user_role_in_organization(user_id: int, organization_id: int) -> str | None:
@@ -95,7 +94,6 @@ async def update_user_organization(user_id: int, organization_id: int, role: str
         .values(role=role)
     )
     await db.execute(stmt)
-    return
 
 
 async def delete_user_organization(user_id: int, organization_id: int) -> None:
@@ -104,4 +102,3 @@ async def delete_user_organization(user_id: int, organization_id: int) -> None:
         UserOrganization.c.organization_id == organization_id,
     )
     await db.execute(stmt)
-    return
