@@ -137,7 +137,7 @@ def check_resource_role(resource: str, role: str) -> bool:
 
 
 @lru_cache
-def action_to_roles(action: str, resource: str) -> Sequence[str]:
+def action_to_roles(action: str, resource: str) -> set[str]:
     resources = {
         'user': user_actions,
         'organization': org_actions,
