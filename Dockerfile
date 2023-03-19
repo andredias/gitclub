@@ -38,7 +38,7 @@ ENV PATH=/venv/bin:${PATH}
 
 WORKDIR /app
 USER nobody
-COPY --chown=nobody:nogroup scripts/entrypoint.sh scripts/migrate_database.py hypercorn.toml alembic.ini ./
+COPY --chown=nobody:nogroup entrypoint.sh migrate_database.py hypercorn.toml alembic.ini ./
 COPY --chown=nobody:nogroup alembic/ ./alembic
 COPY --chown=nobody:nogroup gitclub/ ./gitclub
 

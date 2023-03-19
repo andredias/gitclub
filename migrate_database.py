@@ -16,7 +16,6 @@ async def migrate() -> None:
     await connect_database(db)
     await db.disconnect()
     run('alembic upgrade head'.split(), cwd=parent_path)
-    return
 
 
 if __name__ == '__main__':

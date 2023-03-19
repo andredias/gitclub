@@ -1,6 +1,10 @@
 GitClub
 =======
 
+This is an example application based on GitHub that's meant to model GitHub's permissions system.
+The original idea was proposed by 
+The app is implemented in a number of backend languages, which all expose a common API that is consumed by a React frontend (in the frontend/ folder).
+
 https://github.com/osohq/gitclub
 
 

@@ -1,7 +1,7 @@
 *
 !alembic*
-!scripts/entrypoint.sh
-!scripts/migrate_database.py
+!entrypoint.sh
+!migrate_database.py
 !pyproject.toml
 !poetry.lock
 !hypercorn.toml
