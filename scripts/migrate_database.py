@@ -20,13 +20,5 @@ async def migrate() -> None:
     return
 
 
-async def main() -> None:
-    command = 'hypercorn --config=hypercorn.toml gitclub.main:app'.split()
-    if os.getenv('ENV') != 'production':
-        await migrate()
-        command.insert(1, '--reload')
-    run(command, cwd=parent_path)
-
-
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(migrate())

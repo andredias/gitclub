@@ -31,3 +31,5 @@ services:
         environment:
             DB_HOST: db
             REDIS_HOST: redis
+            ENV: ${ENV:-production}
+        init: true

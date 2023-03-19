@@ -7,12 +7,12 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    apt-get -y upgrade && \
     apt-get install -y --no-install-recommends build-essential libffi-dev libxml2-dev \
     libxslt-dev curl libpq-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl https://install.python-poetry.org | python -
 
 RUN python -m venv /venv
@@ -38,10 +38,10 @@ ENV PATH=/venv/bin:${PATH}
 
 WORKDIR /app
 USER nobody
-COPY --chown=nobody:nogroup entrypoint.py hypercorn.toml alembic.ini ./
+COPY --chown=nobody:nogroup scripts/entrypoint.sh scripts/migrate_database.py hypercorn.toml alembic.ini ./
 COPY --chown=nobody:nogroup alembic/ ./alembic
 COPY --chown=nobody:nogroup gitclub/ ./gitclub
 
 EXPOSE 5000
 
-CMD ["python", "entrypoint.py"]
+CMD ["./entrypoint.sh"]
