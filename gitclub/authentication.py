@@ -1,6 +1,7 @@
 import re
+from typing import Annotated
 
-from fastapi import Cookie, Header, HTTPException
+from fastapi import Cookie, Depends, Header, HTTPException
 
 from .models.user import UserInfo, get
 from .sessions import is_valid_csrf, session_exists
@@ -29,3 +30,6 @@ async def authenticated_user(
     if not user:
         raise HTTPException(status_code=401)
     return user
+
+
+CurrentUser = Annotated[UserInfo, Depends(authenticated_user)]

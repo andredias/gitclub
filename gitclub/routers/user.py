@@ -1,25 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter
 
-from ..authentication import authenticated_user
+from ..authentication import CurrentUser
 from ..authorization import authorized, check_authz
+from ..dependantions import TargetUser
 from ..models.repository import RepositoryInfo
-from ..models.user import UserInfo, get
+from ..models.user import UserInfo
 from ..models.user_repository import get_user_repositories
 
 router = APIRouter(prefix='/users', tags=['users'])
 
 
-async def target_user(id: int) -> UserInfo:
-    user = await get(id)
-    if not user:
-        raise HTTPException(404)
-    return user
-
-
 @router.get('/{id}')
 async def get_user_info(
-    user: UserInfo = Depends(target_user),
-    current_user: UserInfo = Depends(authenticated_user),
+    user: TargetUser,
+    current_user: CurrentUser,
 ) -> UserInfo:
     # authenticated_user can read any user's profile
     await check_authz(current_user, 'read_profile', user)
@@ -28,8 +22,8 @@ async def get_user_info(
 
 @router.get('/{id}/repos')
 async def get_user_respositories(
-    user: UserInfo = Depends(target_user),
-    current_user: UserInfo = Depends(authenticated_user),
+    user: TargetUser,
+    current_user: CurrentUser,
 ) -> list[RepositoryInfo]:
     # authenticated_user can read any user's profile
     await check_authz(current_user, 'read_profile', user)

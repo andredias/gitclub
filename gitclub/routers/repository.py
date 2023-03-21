@@ -1,14 +1,12 @@
 from asyncpg import UniqueViolationError
-from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Body, HTTPException, Response, status
 
-from ..authentication import authenticated_user
 from ..authorization import authorized, check_authz, check_resource_role
-from ..models.organization import OrganizationInfo
+from ..dependantions import CurrentUser, TargetOrganization, TargetRepository
 from ..models.repository import (
     RepositoryInfo,
     RepositoryInsert,
     RepositoryInsert2,
-    get,
     get_organization_repositories,
     insert,
 )
@@ -25,27 +23,14 @@ from ..models.user_repository import (
 )
 from ..models.user_repository import insert as insert_user_repository
 from ..resources import db
-from .organization import get_organization
 
 router = APIRouter(prefix='/organizations/{organization_id}/repositories', tags=['repositories'])
 
 
-async def get_repository(
-    repository_id: int,
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
-) -> RepositoryInfo:
-    repository = await get(repository_id, organization_id=org.id)
-    if not repository:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Repository not found')
-    await check_authz(current_user, 'read', repository)
-    return repository
-
-
 @router.get('')
 async def list_repositories(
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
+    org: TargetOrganization,
+    current_user: CurrentUser,
 ) -> list[RepositoryInfo]:
     """
     List all repositories of a group.
@@ -60,8 +45,8 @@ async def list_repositories(
 async def create_repository(
     new_repo: RepositoryInsert,
     response: Response,
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
+    org: TargetOrganization,
+    current_user: CurrentUser,
 ) -> RepositoryInfo:
     """
     Create a new repository.
@@ -75,8 +60,8 @@ async def create_repository(
 
 @router.get('/{repository_id}')
 async def show(
-    repository: RepositoryInfo = Depends(get_repository),
-    current_user: UserInfo = Depends(authenticated_user),
+    repository: TargetRepository,
+    current_user: CurrentUser,
 ) -> RepositoryInfo:
     """
     Show a repository
@@ -91,8 +76,8 @@ async def show(
 
 @router.get('/{repository_id}/non-members')
 async def list_non_members(
-    repository: RepositoryInfo = Depends(get_repository),
-    current_user: UserInfo = Depends(authenticated_user),
+    repository: TargetRepository,
+    current_user: CurrentUser,
 ) -> list[UserInfo]:
     """
     List all users who aren't members of the repository.
@@ -104,8 +89,8 @@ async def list_non_members(
 
 @router.get('/{repository_id}/members')
 async def list_members(
-    repository: RepositoryInfo = Depends(get_repository),
-    current_user: UserInfo = Depends(authenticated_user),
+    repository: TargetRepository,
+    current_user: CurrentUser,
 ) -> list[RepositoryMemberInfo]:
     """
     List all members of the repository.
@@ -119,10 +104,10 @@ async def list_members(
 @db.transaction()
 async def add_member(
     response: Response,
+    repository: TargetRepository,
+    current_user: CurrentUser,
     user_id: int = Body(...),
     role: str = Body(...),
-    repository: RepositoryInfo = Depends(get_repository),
-    current_user: UserInfo = Depends(authenticated_user),
 ) -> UserRepositoryInfo:
     """
     Add a member to a repository.
@@ -149,9 +134,9 @@ async def add_member(
 @db.transaction()
 async def update_member_role(
     user_id: int,
+    repository: TargetRepository,
+    current_user: CurrentUser,
     role: str = Body(embed=True),
-    repository: RepositoryInfo = Depends(get_repository),
-    current_user: UserInfo = Depends(authenticated_user),
 ) -> UserRepositoryInfo:
     """
     Update the role of a user in the repository.
@@ -170,8 +155,8 @@ async def update_member_role(
 @db.transaction()
 async def remove_member(
     user_id: int,
-    repository: RepositoryInfo = Depends(get_repository),
-    current_user: UserInfo = Depends(authenticated_user),
+    repository: TargetRepository,
+    current_user: CurrentUser,
 ) -> None:
     """
     Delete the role of a user in the organization.

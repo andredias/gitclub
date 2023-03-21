@@ -1,8 +1,9 @@
 from asyncpg.exceptions import UniqueViolationError
-from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Body, HTTPException, Response, status
 
-from ..authentication import authenticated_user
+from ..authentication import CurrentUser
 from ..authorization import authorized, check_authz, check_resource_role
+from ..dependantions import TargetOrganization
 from ..models import organization, user
 from ..models.organization import Organization, OrganizationInfo, OrganizationInsert
 from ..models.user import UserInfo
@@ -22,16 +23,9 @@ from ..resources import db
 router = APIRouter(prefix='/organizations', tags=['organizations'])
 
 
-async def get_organization(organization_id: int) -> OrganizationInfo:
-    org = await organization.get(organization_id)
-    if not org:
-        raise HTTPException(status_code=404, detail='Organization not found')
-    return org
-
-
 @router.get('')
 async def list_organizations(
-    current_user: UserInfo = Depends(authenticated_user),
+    current_user: CurrentUser,
 ) -> list[OrganizationInfo]:
     """
     List all organizations the user is a member of.
@@ -47,7 +41,7 @@ async def list_organizations(
 async def create(
     new_org: OrganizationInsert,
     response: Response,
-    current_user: UserInfo = Depends(authenticated_user),
+    current_user: CurrentUser,
 ) -> OrganizationInfo:
     await check_authz(current_user, 'create', Organization)
     org_id = await organization.insert(new_org)
@@ -59,8 +53,8 @@ async def create(
 
 @router.get('/{organization_id}')
 async def show(
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
+    org: TargetOrganization,
+    current_user: CurrentUser,
 ) -> OrganizationInfo:
     await check_authz(current_user, 'read', org)
     return org
@@ -72,8 +66,8 @@ async def show(
 # was: /unassigned_users
 @router.get('/{organization_id}/non-members')
 async def list_non_members(
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
+    org: TargetOrganization,
+    current_user: CurrentUser,
 ) -> list[UserInfo]:
     """
     List all users who aren't members of the organization.
@@ -86,8 +80,8 @@ async def list_non_members(
 # was: /role_assignments
 @router.get('/{organization_id}/members')
 async def list_members(
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
+    org: TargetOrganization,
+    current_user: CurrentUser,
 ) -> list[OrganizationMemberInfo]:
     """
     List all members of the organization.
@@ -106,10 +100,10 @@ async def list_members(
 @db.transaction()
 async def add_member(
     response: Response,
+    org: TargetOrganization,
+    current_user: CurrentUser,
     user_id: int = Body(...),
     role: str = Body(...),
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
 ) -> UserOrganizationInfo:
     """
     Add a user to the organization.
@@ -133,9 +127,9 @@ async def add_member(
 @db.transaction()
 async def update_member_role(
     user_id: int,
+    org: TargetOrganization,
+    current_user: CurrentUser,
     role: str = Body(embed=True),
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
 ) -> UserOrganizationInfo:
     """
     Update the role of a user in the organization.
@@ -154,8 +148,8 @@ async def update_member_role(
 @db.transaction()
 async def remove_member(
     user_id: int,
-    org: OrganizationInfo = Depends(get_organization),
-    current_user: UserInfo = Depends(authenticated_user),
+    org: TargetOrganization,
+    current_user: CurrentUser,
 ) -> None:
     """
     Delete the role of a user in the organization.

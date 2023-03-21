@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Response
 
-from ..authentication import authenticated_user
 from ..authorization import check_authz
+from ..dependantions import CurrentUser, TargetIssue, TargetRepository
 from ..models.issue import (
     IssueInfo,
     IssueInsert,
@@ -11,31 +11,17 @@ from ..models.issue import (
     insert,
     update,
 )
-from ..models.repository import RepositoryInfo
-from ..models.user import UserInfo
 from ..resources import db
-from .repository import get_repository
 
 router = APIRouter(
     prefix='/organizations/{organization_id}/repositories/{repository_id}/issues', tags=['issues']
 )
 
 
-async def get_issue(
-    organization_id: int,
-    repository_id: int,
-    issue_id: int,
-) -> IssueInfo:
-    issue = await get(issue_id, repository_id=repository_id, organization_id=organization_id)
-    if not issue:
-        raise HTTPException(status_code=404, detail='Issue not found')
-    return issue
-
-
 @router.get('')
 async def list_issues(
-    repos: RepositoryInfo = Depends(get_repository),
-    current_user: UserInfo = Depends(authenticated_user),
+    repos: TargetRepository,
+    current_user: CurrentUser,
 ) -> list[IssueInfo]:
     """
     List all issues of a repository.
@@ -50,8 +36,8 @@ async def list_issues(
 async def create_issue(
     data: IssueInsert,
     response: Response,
-    repos: RepositoryInfo = Depends(get_repository),
-    current_user: UserInfo = Depends(authenticated_user),
+    repos: TargetRepository,
+    current_user: CurrentUser,
 ) -> IssueInfo:
     """
     Create a new issue.
@@ -67,8 +53,8 @@ async def create_issue(
 
 @router.get('/{issue_id}')
 async def show(
-    issue: IssueInfo = Depends(get_issue),
-    current_user: UserInfo = Depends(authenticated_user),
+    issue: TargetIssue,
+    current_user: CurrentUser,
 ) -> IssueInfo:
     """
     Show an issue
@@ -80,8 +66,8 @@ async def show(
 @router.put('/{issue_id}')
 @router.patch('/{issue_id}')
 async def close(
-    issue: IssueInfo = Depends(get_issue),
-    current_user: UserInfo = Depends(authenticated_user),
+    issue: TargetIssue,
+    current_user: CurrentUser,
 ) -> None:
     """
     Close an issue
