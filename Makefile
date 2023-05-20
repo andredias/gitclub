@@ -3,7 +3,7 @@ SHELL := /bin/bash -O globstar
 
 run_dev: check_env
 	@ docker compose up -d redis db; \
-	ENV=development python entrypoint.py
+	ENV=development ./entrypoint.sh
 
 
 test: check_env
