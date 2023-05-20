@@ -1,11 +1,10 @@
 from fastapi import APIRouter
 
 from ..authentication import CurrentUser
-from ..authorization import authorized, check_authz
+from ..authorization import action_to_roles, authorized, check_authz
 from ..dependantions import TargetUser
-from ..models.repository import RepositoryInfo
+from ..models.repository import RepositoryInfo, get_allowed_repositories
 from ..models.user import UserInfo
-from ..models.user_repository import get_user_repositories
 
 router = APIRouter(prefix='/users', tags=['users'])
 
@@ -20,13 +19,22 @@ async def get_user_info(
     return user
 
 
-@router.get('/{id}/repos')
+@router.get('/{id}/repositories')
 async def get_user_respositories(
     user: TargetUser,
     current_user: CurrentUser,
 ) -> list[RepositoryInfo]:
+    """
+    Return all repositories that a user has access to via membership to an organization
+    or direct access to a repository.
+    Only return repositories that current_user has also access to.
+    """
     # authenticated_user can read any user's profile
     await check_authz(current_user, 'read_profile', user)
-    repos = await get_user_repositories(user.id)
-    # but can only read repos that he has access to
+    repo_roles = list(action_to_roles('read', 'repository'))
+    org_roles = list(action_to_roles('list_repos', 'organization'))
+    repos = await get_allowed_repositories(user.id, repo_roles=repo_roles, org_roles=org_roles)
+    # but can only read repos that authenticated user (current_user) has access to
+    if current_user.id == user.id:
+        return repos
     return [repo for repo in repos if await authorized(current_user, 'read', repo)]
