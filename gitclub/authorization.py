@@ -1,4 +1,4 @@
-from functools import lru_cache
+from functools import cache
 
 from fastapi import HTTPException
 from pydantic import BaseModel
@@ -113,7 +113,7 @@ async def check_authz(actor: BaseModel, action: str, resource: ResourceType) -> 
     return True
 
 
-@lru_cache
+@cache
 def resource_roles(resource: str) -> set[str]:
     match resource:
         case 'user':
@@ -133,7 +133,7 @@ def check_resource_role(resource: str, role: str) -> bool:
     return True
 
 
-@lru_cache
+@cache
 def action_to_roles(action: str, resource: str) -> set[str]:
     resources = {
         'user': user_actions,
